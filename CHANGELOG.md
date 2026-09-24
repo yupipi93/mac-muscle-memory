@@ -88,6 +88,23 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-09-24, the shortcut card redesigned
+
+The card is the repository's public face, so it was rebuilt rather than patched:
+
+- A thesis instead of a label: "Ctrl means Ctrl again", with an SVG of a keyboard corner where
+  the Control key is the one lit up.
+- Ubuntu orange as the single accent and the Ubuntu type family, because the habits being
+  carried over come from there. Light and dark themes.
+- One SVG icon per group: desktops, text, screenshots, Finder, terminal, session. Keycaps drawn
+  with relief, and every Ctrl cap carries the orange edge, so the page shows at a glance which
+  shortcuts are the Windows and Linux ones.
+- Screen only: the measured numbers (desktop switch 1165 to 130 ms, window move 980 ms to
+  0.4 s) and a filter box that narrows the list as you type ("tab", "bold", "trash").
+- Print unchanged in purpose: still one A4 page, checked with headless Chrome, with the art,
+  numbers and filter left out.
+- Finder and Session are now separate groups; the README screenshot is regenerated.
+
 ## 2026-09-24, Option+Tab for the next window of the same app
 
 - Symbolic hotkey 27, "move focus to next window", rebound from Cmd+` to **Option+Tab**, like

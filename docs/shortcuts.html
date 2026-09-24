@@ -6,62 +6,74 @@
 <title>Mac Shortcut Card</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@500;700&family=Ubuntu+Sans:wght@400;500;600&family=Ubuntu+Sans+Mono:wght@500;600&display=swap">
 <style>
   :root {
-    --paper: #f6f7f9;
+    --paper: #eceef2;
     --sheet: #ffffff;
-    --ink: #1a1e24;
-    --ink-soft: #545c68;
-    --rule: #dde1e7;
-    --accent: #274b7a;
-    --accent-soft: #e6ecf4;
-    --cap-face: #ffffff;
-    --cap-edge: #b9c0ca;
-    --cap-shadow: #c9ced6;
+    --ink: #16191e;
+    --ink-soft: #5a6270;
+    --ink-faint: #8b93a0;
+    --rule: #e2e5ea;
+    --accent: #e95420;
+    --accent-ink: #b8400f;
+    --accent-soft: #fdeee6;
+    --cap-top: #ffffff;
+    --cap-bottom: #eceef2;
+    --cap-edge: #c2c7d0;
+    --cap-ink: #1c2026;
+    --cap-glyph: #7b8390;
     --warn: #8a5a00;
-    --warn-soft: #fbf1dc;
-    --native: #5b6472;
-    --native-soft: #eceef1;
-    --display: "IBM Plex Sans Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
-    --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
-    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --warn-soft: #fff5e1;
+    --tag: #5b6472;
+    --tag-soft: #eceef1;
+    --display: "Ubuntu", "Helvetica Neue", Arial, sans-serif;
+    --body: "Ubuntu Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono: "Ubuntu Sans Mono", "SF Mono", Menlo, ui-monospace, monospace;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       color-scheme: dark;
-      --paper: #12151a;
-      --sheet: #1a1e25;
-      --ink: #e7eaef;
-      --ink-soft: #a3abb7;
-      --rule: #2d333d;
-      --accent: #8fb0dc;
-      --accent-soft: #223249;
-      --cap-face: #262b34;
-      --cap-edge: #465061;
-      --cap-shadow: #0b0d10;
-      --warn: #e7b85c;
-      --warn-soft: #33290f;
-      --native: #aab2be;
-      --native-soft: #2a3039;
+      --paper: #0e1014;
+      --sheet: #16191f;
+      --ink: #e9ebef;
+      --ink-soft: #a0a8b5;
+      --ink-faint: #6d7582;
+      --rule: #272c35;
+      --accent: #ff6b35;
+      --accent-ink: #ff8c5e;
+      --accent-soft: #33201a;
+      --cap-top: #2b3039;
+      --cap-bottom: #22262e;
+      --cap-edge: #3f4652;
+      --cap-ink: #eef0f3;
+      --cap-glyph: #9aa2ae;
+      --warn: #efbd5d;
+      --warn-soft: #2c2412;
+      --tag: #aab2be;
+      --tag-soft: #262b33;
     }
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --paper: #12151a;
-    --sheet: #1a1e25;
-    --ink: #e7eaef;
-    --ink-soft: #a3abb7;
-    --rule: #2d333d;
-    --accent: #8fb0dc;
-    --accent-soft: #223249;
-    --cap-face: #262b34;
-    --cap-edge: #465061;
-    --cap-shadow: #0b0d10;
-    --warn: #e7b85c;
-    --warn-soft: #33290f;
-    --native: #aab2be;
-    --native-soft: #2a3039;
+    --paper: #0e1014;
+    --sheet: #16191f;
+    --ink: #e9ebef;
+    --ink-soft: #a0a8b5;
+    --ink-faint: #6d7582;
+    --rule: #272c35;
+    --accent: #ff6b35;
+    --accent-ink: #ff8c5e;
+    --accent-soft: #33201a;
+    --cap-top: #2b3039;
+    --cap-bottom: #22262e;
+    --cap-edge: #3f4652;
+    --cap-ink: #eef0f3;
+    --cap-glyph: #9aa2ae;
+    --warn: #efbd5d;
+    --warn-soft: #2c2412;
+    --tag: #aab2be;
+    --tag-soft: #262b33;
   }
 
   * { box-sizing: border-box; }
@@ -69,311 +81,492 @@
     margin: 0;
     background: var(--paper);
     color: var(--ink);
-    font: 400 14px/1.45 var(--body);
+    font: 400 14px/1.5 var(--body);
     padding-inline: 16px;
-    padding-block: 28px 40px;
+    padding-block: 28px 44px;
   }
   .sheet {
-    max-width: 1060px;
+    max-width: 1140px;
     margin: 0 auto;
     background: var(--sheet);
+    border-radius: 14px;
     border: 1px solid var(--rule);
-    padding: 28px clamp(16px, 3vw, 36px) 24px;
+    overflow: hidden;
   }
+  .inner { padding: 0 clamp(18px, 3.4vw, 40px); }
 
-  header.masthead {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 12px 24px;
-    padding-bottom: 14px;
-    border-bottom: 2px solid var(--ink);
+  /* ---------- hero ---------- */
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 20px 32px;
+    align-items: center;
+    padding-block: 34px 26px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .eyebrow {
+    font: 600 11.5px/1.3 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    margin: 0 0 10px;
   }
   h1 {
-    font: 700 30px/1.05 var(--display);
-    letter-spacing: -0.01em;
+    font: 700 clamp(30px, 4.4vw, 46px)/1.02 var(--display);
+    letter-spacing: -0.02em;
     margin: 0;
     text-wrap: balance;
   }
-  .machine {
-    font: 500 11px/1.5 var(--mono);
-    color: var(--ink-soft);
-    text-align: right;
-  }
-  .lede {
-    margin: 12px 0 0;
-    max-width: 70ch;
-    color: var(--ink-soft);
-  }
-  .legend {
+  h1 em { font-style: normal; color: var(--accent); }
+  .lede { margin: 12px 0 0; max-width: 52ch; color: var(--ink-soft); font-size: 15px; }
+  .hero-art { width: 100%; max-width: 420px; justify-self: end; }
+  .hero-art svg { display: block; width: 100%; height: auto; }
+
+  /* ---------- stats + filter ---------- */
+  .bar {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 18px;
-    margin: 12px 0 0;
-    font-size: 12px;
-    color: var(--ink-soft);
-  }
-  .legend span { display: inline-flex; align-items: center; gap: 6px; }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 470px), 1fr));
-    gap: 22px 32px;
-    margin-top: 22px;
-  }
-  section { break-inside: avoid; }
-  .stack { display: grid; gap: 22px 0; align-content: start; }
-  h2 {
-    font: 700 13px/1.2 var(--display);
-    text-transform: uppercase;
-    letter-spacing: 0.09em;
-    color: var(--accent);
-    margin: 0 0 6px;
-    padding-bottom: 6px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px 28px;
+    padding-block: 16px;
     border-bottom: 1px solid var(--rule);
   }
+  .stats { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 0; padding: 0; list-style: none; }
+  .stats li { display: grid; gap: 1px; }
+  .stats b { font: 700 20px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+  .stats b s { color: var(--ink-faint); font-weight: 500; font-size: 14px; margin-right: 6px; text-decoration-thickness: 1.5px; }
+  .stats span { font-size: 12px; color: var(--ink-soft); }
+  .filter { position: relative; flex: 1 1 240px; max-width: 340px; }
+  .filter input {
+    width: 100%;
+    font: 500 14px/1.2 var(--body);
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 9px;
+    padding: 10px 12px 10px 36px;
+  }
+  .filter input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+  .filter svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; stroke: var(--ink-faint); fill: none; stroke-width: 2; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 14px 0 0; font-size: 12px; color: var(--ink-soft); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* ---------- groups ---------- */
+  .groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 470px), 1fr));
+    gap: 30px 44px;
+    padding-block: 22px 8px;
+  }
+  .group { break-inside: avoid; }
+  .group-head { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+  .badge {
+    flex: none;
+    width: 38px; height: 38px;
+    display: grid; place-items: center;
+    border-radius: 10px;
+    background: var(--accent-soft);
+  }
+  .badge svg { width: 22px; height: 22px; fill: none; stroke: var(--accent-ink); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  h2 { font: 700 17px/1.2 var(--display); margin: 0; letter-spacing: -0.005em; }
+  .count { font: 500 11.5px/1 var(--mono); color: var(--ink-faint); margin-left: auto; }
+
   .row {
     display: grid;
-    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
-    gap: 4px 14px;
-    padding: 7px 0;
-    border-bottom: 1px dashed var(--rule);
-    align-items: baseline;
+    grid-template-columns: minmax(0, 16rem) minmax(0, 1fr);
+    gap: 4px 16px;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--rule);
   }
   .row:last-child { border-bottom: 0; }
-  .keys { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; }
-  .keys .plus, .keys .or { color: var(--ink-soft); font-size: 11px; }
-  .keys .or { margin: 0 4px; font-style: italic; }
+  .keys { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  .keys .p, .keys .o { font-style: normal; color: var(--ink-faint); font-size: 12px; }
+  .keys .o { margin: 0 2px; }
+  .keys .word { font-size: 13px; color: var(--ink-soft); }
   kbd {
-    display: inline-block;
-    min-width: 1.9em;
-    padding: 1px 6px 2px;
-    font: 600 11.5px/1.5 var(--mono);
-    text-align: center;
-    color: var(--ink);
-    background: var(--cap-face);
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    min-width: 2em;
+    justify-content: center;
+    padding: 4px 8px 3px;
+    font: 600 12px/1.2 var(--mono);
+    color: var(--cap-ink);
+    background: linear-gradient(var(--cap-top), var(--cap-bottom));
     border: 1px solid var(--cap-edge);
-    border-bottom-width: 2px;
-    border-radius: 4px;
-    box-shadow: 0 1px 0 var(--cap-shadow);
+    border-bottom-width: 3px;
+    border-radius: 6px;
     white-space: nowrap;
   }
-  .what { font-weight: 500; }
-  .note { display: block; font-weight: 400; font-size: 12px; color: var(--ink-soft); margin-top: 1px; }
+  kbd .g { color: var(--cap-glyph); font-weight: 500; }
+  kbd.ctrl { border-bottom-color: var(--accent); }
+  kbd.ctrl .g { color: var(--accent-ink); }
+  .what { font-weight: 600; font-size: 14px; }
+  .note { display: block; font-weight: 400; font-size: 12.5px; color: var(--ink-soft); margin-top: 1px; }
   .tag {
     display: inline-block;
-    font: 600 9.5px/1.6 var(--mono);
+    font: 600 9.5px/1.7 var(--mono);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 0 5px;
-    border-radius: 3px;
-    vertical-align: 1px;
+    letter-spacing: 0.07em;
+    padding: 0 6px;
+    border-radius: 4px;
+    color: var(--tag);
+    background: var(--tag-soft);
+    vertical-align: 2px;
+    margin-left: 4px;
   }
-  .tag.native { color: var(--native); background: var(--native-soft); }
-  .tag.gesture { color: var(--accent); background: var(--accent-soft); }
+  .tag.mouse { color: var(--accent-ink); background: var(--accent-soft); margin-left: 0; }
+  .empty { display: none; padding: 26px 0; color: var(--ink-soft); }
+  .empty.show { display: block; }
 
-  .caveats {
-    margin-top: 26px;
-    padding: 12px 14px;
+  /* ---------- trade-offs ---------- */
+  .tradeoffs {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 4px 14px;
+    margin-block: 26px 0;
+    padding: 16px 18px;
     background: var(--warn-soft);
-    border-left: 3px solid var(--warn);
+    border-radius: 12px;
     break-inside: avoid;
   }
-  .caveats h2 { color: var(--warn); border-bottom-color: transparent; padding-bottom: 0; }
-  .caveats ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; }
-  .caveats li { max-width: 95ch; }
+  .tradeoffs svg { width: 22px; height: 22px; fill: none; stroke: var(--warn); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; margin-top: 2px; }
+  .tradeoffs h2 { color: var(--warn); font-size: 15px; }
+  .tradeoffs ul { grid-column: 2; margin: 4px 0 0; padding-left: 18px; display: grid; gap: 5px; }
+  .tradeoffs li { max-width: 100ch; }
+  .tradeoffs kbd { padding: 1px 6px; font-size: 11px; border-bottom-width: 2px; }
 
   footer {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 6px 20px;
-    margin-top: 18px;
-    padding-top: 10px;
+    margin-top: 22px;
+    padding-block: 14px 20px;
     border-top: 1px solid var(--rule);
-    font: 500 10.5px/1.5 var(--mono);
+    font: 500 11.5px/1.5 var(--mono);
     color: var(--ink-soft);
   }
-  .screen-only { font-family: var(--body); }
+  footer a { color: inherit; }
 
+  @media (max-width: 760px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-art { justify-self: start; max-width: 340px; }
+  }
   @media (max-width: 520px) {
     .row { grid-template-columns: 1fr; }
-    .machine { text-align: left; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-art .ctrl-cap { transform-origin: 50% 100%; animation: press 3.2s ease-in-out 0.6s infinite; }
+    @keyframes press { 0%, 70%, 100% { transform: translateY(0); } 76% { transform: translateY(3px); } 84% { transform: translateY(0); } }
   }
 
-  @page { size: A4 portrait; margin: 11mm 10mm; }
+  /* ---------- print: one A4 page ---------- */
+  @page { size: A4 portrait; margin: 9mm 9mm; }
   @media print {
     :root, :root[data-theme="dark"], :root:not([data-theme="light"]) {
       color-scheme: light;
-      --paper: #ffffff; --sheet: #ffffff; --ink: #000000; --ink-soft: #3f4650;
-      --rule: #c9ced6; --accent: #1f3f6b; --accent-soft: #e6ecf4;
-      --cap-face: #ffffff; --cap-edge: #7d8591; --cap-shadow: #ffffff;
-      --warn: #6b4600; --warn-soft: #fbf1dc; --native: #3f4650; --native-soft: #eceef1;
+      --paper: #ffffff; --sheet: #ffffff; --ink: #000000; --ink-soft: #3d4450; --ink-faint: #6b7380;
+      --rule: #d4d8de; --accent: #e95420; --accent-ink: #a8390c; --accent-soft: #fdeee6;
+      --cap-top: #ffffff; --cap-bottom: #f1f2f4; --cap-edge: #8b929d; --cap-ink: #000000; --cap-glyph: #5b6270;
+      --warn: #6b4600; --warn-soft: #fff5e1; --tag: #3d4450; --tag-soft: #eceef1;
     }
-    body { padding: 0; font-size: 9.8px; line-height: 1.38; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .sheet { border: 0; padding: 0; max-width: none; }
-    h1 { font-size: 24px; }
-    .grid { grid-template-columns: 1fr 1fr; gap: 10px 20px; margin-top: 10px; }
-    h2 { margin-bottom: 3px; padding-bottom: 3px; }
-    header.masthead { padding-bottom: 8px; }
-    .lede, .legend { margin-top: 6px; }
-    .row { grid-template-columns: minmax(0, 12.6rem) minmax(0, 1fr); padding: 2px 0; gap: 1px 10px; }
-    kbd { font-size: 8.6px; padding: 0 4px 0; line-height: 1.45; box-shadow: none; }
-    .note { font-size: 9px; margin-top: 0; }
-    .caveats { margin-top: 12px; padding: 6px 10px; }
-    .caveats ul { gap: 2px; margin-top: 3px; }
-    footer { margin-top: 10px; padding-top: 6px; }
-    .stack { gap: 10px 0; }
-    .screen-only { display: none; }
+    body { padding: 0; font-size: 9.4px; line-height: 1.34; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .sheet { border: 0; border-radius: 0; max-width: none; }
+    .inner { padding: 0; }
+    .hero { grid-template-columns: minmax(0, 1fr) 150px; padding-block: 0 8px; gap: 12px; }
+    .eyebrow { font-size: 8px; margin-bottom: 3px; }
+    h1 { font-size: 21px; }
+    .lede { font-size: 9.4px; margin-top: 4px; max-width: none; }
+    .bar .filter, .bar .stats, .screen-only { display: none; }
+    .bar { padding-block: 0; border: 0; }
+    .legend { margin-top: 5px; font-size: 8.4px; }
+    .groups { grid-template-columns: 1fr 1fr; gap: 9px 18px; padding-block: 8px 0; }
+    .group-head { gap: 7px; margin-bottom: 1px; }
+    .badge { width: 20px; height: 20px; border-radius: 5px; }
+    .badge svg { width: 13px; height: 13px; stroke-width: 2; }
+    h2 { font-size: 11px; }
+    .count { font-size: 8px; }
+    .row { grid-template-columns: minmax(0, 11.4rem) minmax(0, 1fr); padding: 2px 0; gap: 1px 8px; }
+    kbd { font-size: 8.2px; padding: 1px 4px 0; border-bottom-width: 2px; border-radius: 3px; gap: 2px; }
+    .keys { gap: 2px; }
+    .keys .p, .keys .o { font-size: 8px; }
+    .keys .word { font-size: 8.6px; }
+    .what { font-size: 9.4px; }
+    .note { font-size: 8.4px; margin-top: 0; }
+    .tag { font-size: 7px; padding: 0 3px; }
+    .tradeoffs { margin-top: 8px; padding: 6px 10px; gap: 1px 8px; border-radius: 6px; }
+    .tradeoffs svg { width: 13px; height: 13px; }
+    .tradeoffs h2 { font-size: 10px; }
+    .tradeoffs ul { gap: 1px; margin-top: 1px; }
+    .tradeoffs kbd { font-size: 7.6px; padding: 0 3px; }
+    footer { margin-top: 6px; padding-block: 4px 0; font-size: 7.8px; }
+    .hero-art .ctrl-cap { animation: none; }
   }
+  /* hero keyboard art */
+  .cap-body { fill: var(--cap-bottom); stroke: var(--cap-edge); stroke-width: 1.5; }
+  .cap-face { fill: var(--cap-top); }
+  .cap-txt { font: 600 12px var(--mono); fill: var(--cap-ink); }
+  .cap-glyph { font: 500 17px var(--mono); fill: var(--cap-glyph); }
+  .ctrl-cap .cap-body { stroke: var(--accent); stroke-width: 2.5; }
+  .ctrl-cap .cap-glyph, .ctrl-cap .cap-txt { fill: var(--accent-ink); }
+  .dim { opacity: 0.55; }
+  .anno { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
+  .anno-head { fill: var(--accent); }
+  .anno-txt { font: 600 13px var(--body); fill: var(--ink); }
+  .anno-sub { font: 400 12px var(--body); fill: var(--ink-soft); }
 </style>
 </head>
 <body>
 <main class="sheet">
-  <header class="masthead">
-    <h1>Mac Shortcut Card</h1>
-    <div class="machine">MacBook Air M5 · macOS 27<br>Hammerspoon · Ghostty</div>
-  </header>
-  <p class="lede">Custom shortcuts on this Mac, set up so hands trained on Ubuntu and Windows work here. Every native Cmd shortcut still works alongside them.</p>
-  <div class="legend">
-    <span><span class="tag native">native</span> macOS shortcut, rebound or kept</span>
-    <span><span class="tag gesture">mouse</span> not a key combination</span>
-  </div>
+  <div class="inner">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">mac-muscle-memory · shortcut card</p>
+        <h1>Ctrl means <em>Ctrl</em> again.</h1>
+        <p class="lede">Ubuntu and Windows habits, working on macOS: copy, paste, words, screenshots, desktops and terminal tabs where your fingers expect them. Every native Cmd shortcut still works.</p>
+      </div>
+      <div class="hero-art">
+        <svg viewBox="0 0 420 176" role="img" aria-labelledby="art-title">
+          <title id="art-title">The bottom-left corner of a keyboard. The Control key is highlighted: it does the job of Command again.</title>
+          <path class="anno" d="M112 88 C 112 52, 150 40, 196 40"/>
+          <path class="anno-head" d="M196 33 L210 40 L196 47 Z"/>
+          <text class="anno-txt" x="216" y="36">copy, paste, undo, bold,</text>
+          <text class="anno-txt" x="216" y="54">words, select all</text>
+          <text class="anno-sub" x="216" y="72">in every app</text>
+          <g class="dim">
+            <rect class="cap-body" x="6" y="96" width="56" height="66" rx="10"/>
+            <rect class="cap-face" x="11" y="100" width="46" height="48" rx="7"/>
+            <text class="cap-txt" x="18" y="140">fn</text>
+          </g>
+          <g class="ctrl-cap">
+            <rect class="cap-body" x="70" y="96" width="78" height="66" rx="10"/>
+            <rect class="cap-face" x="75" y="100" width="68" height="48" rx="7"/>
+            <text class="cap-glyph" x="84" y="121">⌃</text>
+            <text class="cap-txt" x="84" y="140">control</text>
+          </g>
+          <g class="dim">
+            <rect class="cap-body" x="156" y="96" width="70" height="66" rx="10"/>
+            <rect class="cap-face" x="161" y="100" width="60" height="48" rx="7"/>
+            <text class="cap-glyph" x="170" y="121">⌥</text>
+            <text class="cap-txt" x="170" y="140">option</text>
+          </g>
+          <g class="dim">
+            <rect class="cap-body" x="234" y="96" width="86" height="66" rx="10"/>
+            <rect class="cap-face" x="239" y="100" width="76" height="48" rx="7"/>
+            <text class="cap-glyph" x="248" y="121">⌘</text>
+            <text class="cap-txt" x="248" y="140">command</text>
+          </g>
+          <g class="dim">
+            <rect class="cap-body" x="328" y="96" width="120" height="66" rx="10"/>
+            <rect class="cap-face" x="333" y="100" width="110" height="48" rx="7"/>
+          </g>
+        </svg>
+      </div>
+    </header>
 
-  <div class="grid">
-    <section aria-labelledby="h-desktops">
-      <h2 id="h-desktops">Desktops, windows and monitors</h2>
-      <div class="row">
-        <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>⌘ Cmd</kbd><span class="plus">+</span><kbd>←</kbd><span class="plus">/</span><kbd>→</kbd></div>
-        <div class="what">Switch to the previous / next desktop <span class="tag native">native</span><span class="note">Moved from Ctrl+Arrow to free it for text editing.</span></div>
-      </div>
-      <div class="row">
-        <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>⌘ Cmd</kbd><span class="plus">+</span><kbd>⇧ Shift</kbd><span class="plus">+</span><kbd>←</kbd><span class="plus">/</span><kbd>→</kbd></div>
-        <div class="what">Take the focused window to the next desktop and follow it<span class="note">About 0.4 s. Not for full-screen windows.</span></div>
-      </div>
-      <div class="row">
-        <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>⌥ Alt</kbd><span class="plus">+</span><kbd>←</kbd><span class="plus">/</span><kbd>→</kbd></div>
-        <div class="what">Move the focused window to the monitor on that side<span class="note">Same desktop. Rescaled to the new screen. Stops at the edge monitor.</span></div>
-      </div>
-      <div class="row">
-        <div class="keys"><kbd>⌥ Alt</kbd><span class="plus">+</span><kbd>Tab</kbd>, add <kbd>⇧ Shift</kbd></div>
-        <div class="what">Next / previous window of the same app <span class="tag native">native</span><span class="note">Moved from Cmd+`, like Alt+` on GNOME.</span></div>
-      </div>
-      <div class="row">
-        <div class="keys"><span class="tag gesture">mouse</span> wheel over the Dock</div>
-        <div class="what">Change desktop, as on the Ubuntu dock<span class="note">Wheel up: previous. Wheel down: next. About 0.13 s.</span></div>
-      </div>
-    </section>
+    <div class="bar">
+      <ul class="stats">
+        <li><b><s>1165 ms</s>130 ms</b><span>switch desktop</span></li>
+        <li><b><s>980 ms</s>0.4 s</b><span>take a window along</span></li>
+        <li><b>30+</b><span>shortcuts, one file</span></li>
+      </ul>
+      <label class="filter" for="filter">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input id="filter" type="search" placeholder="Filter: tab, bold, desktop, trash" autocomplete="off" aria-label="Filter shortcuts">
+      </label>
+    </div>
 
-    <section aria-labelledby="h-text">
-      <h2 id="h-text">Text editing, in every app</h2>
-      <div class="row">
-        <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>C</kbd> <kbd>X</kbd> <kbd>V</kbd></div>
-        <div class="what">Copy, cut, paste</div>
-      </div>
-      <div class="row">
-        <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>⇧ Shift</kbd><span class="plus">+</span><kbd>V</kbd></div>
-        <div class="what">Paste without formatting<span class="note">Your formatted clipboard is restored right after.</span></div>
-      </div>
-      <div class="row">
-        <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>Z</kbd></div>
-        <div class="what">Undo</div>
-      </div>
-      <div class="row">
-        <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>A</kbd></div>
-        <div class="what">Select all</div>
-      </div>
-      <div class="row">
-        <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>B</kbd></div>
-        <div class="what">Bold the selected text</div>
-      </div>
-      <div class="row">
-        <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>←</kbd><span class="plus">/</span><kbd>→</kbd></div>
-        <div class="what">Jump one word</div>
-      </div>
-      <div class="row">
-        <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>⇧ Shift</kbd><span class="plus">+</span><kbd>←</kbd><span class="plus">/</span><kbd>→</kbd></div>
-        <div class="what">Extend the selection one word</div>
-      </div>
-    </section>
+    <div class="legend">
+      <span><span class="tag">native</span> macOS shortcut, kept or rebound</span>
+      <span><span class="tag">built-in</span> the app's own default</span>
+      <span><span class="tag mouse">mouse</span> not a key combination</span>
+      <span><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd> the key doing Windows and Linux jobs</span>
+    </div>
 
-    <div class="stack">
-      <section aria-labelledby="h-shots">
-        <h2 id="h-shots">Screenshots</h2>
-        <div class="row">
-          <div class="keys"><kbd>Print Screen</kbd></div>
-          <div class="what">Crop an area: saved <em>and</em> copied to the clipboard<span class="note">Drag to select, Esc to cancel. Shutter sound. Saved to ~/Pictures/Screenshots.</span></div>
+    <div class="groups" id="groups">
+      <section class="group" aria-labelledby="g-desk">
+        <div class="group-head">
+          <span class="badge"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="12" height="9" rx="1.6"/><rect x="9.5" y="10" width="12" height="9" rx="1.6"/><path d="M5.5 16.5h2M18.5 7.5v-2"/></svg></span>
+          <h2 id="g-desk">Desktops, windows, monitors</h2><span class="count">5</span>
         </div>
-        <div class="row">
-          <div class="keys"><kbd>⌘ Cmd</kbd><span class="plus">+</span><kbd>⇧ Shift</kbd><span class="plus">+</span><kbd>5</kbd></div>
-          <div class="what">Full screenshot and recording toolbar <span class="tag native">native</span></div>
+        <div class="row" data-k="space mission switch next previous">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⌘</span>Cmd</kbd><i class="p">+</i><kbd>←</kbd><i class="o">/</i><kbd>→</kbd></div>
+          <div class="what">Previous / next desktop<span class="tag">native</span><span class="note">Moved off Ctrl+Arrow to free it for text.</span></div>
         </div>
-        <div class="row">
-          <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>⌘ Cmd</kbd><span class="plus">+</span><kbd>⇧ Shift</kbd><span class="plus">+</span><kbd>4</kbd></div>
-          <div class="what">Crop to the clipboard only, no file <span class="tag native">native</span></div>
+        <div class="row" data-k="move window space follow">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⌘</span>Cmd</kbd><i class="p">+</i><kbd><span class="g">⇧</span>Shift</kbd><i class="p">+</i><kbd>←</kbd><i class="o">/</i><kbd>→</kbd></div>
+          <div class="what">Take the window to the next desktop<span class="note">You follow it. About 0.4 s.</span></div>
+        </div>
+        <div class="row" data-k="monitor screen display move">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⌥</span>Alt</kbd><i class="p">+</i><kbd>←</kbd><i class="o">/</i><kbd>→</kbd></div>
+          <div class="what">Window to the monitor on that side<span class="note">Same desktop, rescaled to fit.</span></div>
+        </div>
+        <div class="row" data-k="cycle windows same app alt tab option">
+          <div class="keys"><kbd><span class="g">⌥</span>Alt</kbd><i class="p">+</i><kbd>Tab</kbd><span class="word">, add</span><kbd><span class="g">⇧</span>Shift</kbd></div>
+          <div class="what">Next / previous window of the same app<span class="tag">native</span><span class="note">Moved off Cmd+`, like Alt+` on GNOME.</span></div>
+        </div>
+        <div class="row" data-k="scroll wheel dock ubuntu">
+          <div class="keys"><span class="tag mouse">mouse</span><span class="word">wheel over the Dock</span></div>
+          <div class="what">Change desktop, like the Ubuntu dock<span class="note">Up: previous. Down: next. About 0.13 s.</span></div>
         </div>
       </section>
-      <section aria-labelledby="h-term">
-        <h2 id="h-term">Ghostty terminal</h2>
-        <div class="row">
-          <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>⌘ Cmd</kbd><span class="plus">+</span><kbd>T</kbd></div>
+
+      <section class="group" aria-labelledby="g-text">
+        <div class="group-head">
+          <span class="badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 19 8 6h1.2L13.7 19M5.3 14.5h6.2"/><path d="M18 5v14M16 5h4M16 19h4"/></svg></span>
+          <h2 id="g-text">Text, in every app</h2><span class="count">7</span>
+        </div>
+        <div class="row" data-k="copy cut paste clipboard">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd>C</kbd><kbd>X</kbd><kbd>V</kbd></div>
+          <div class="what">Copy, cut, paste</div>
+        </div>
+        <div class="row" data-k="paste plain formatting clipboard">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⇧</span>Shift</kbd><i class="p">+</i><kbd>V</kbd></div>
+          <div class="what">Paste without formatting<span class="note">Your formatted clipboard comes back right after.</span></div>
+        </div>
+        <div class="row" data-k="undo">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd>Z</kbd></div>
+          <div class="what">Undo</div>
+        </div>
+        <div class="row" data-k="select all">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd>A</kbd></div>
+          <div class="what">Select all</div>
+        </div>
+        <div class="row" data-k="bold format">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd>B</kbd></div>
+          <div class="what">Bold the selection</div>
+        </div>
+        <div class="row" data-k="word jump move cursor">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd>←</kbd><i class="o">/</i><kbd>→</kbd></div>
+          <div class="what">Jump one word</div>
+        </div>
+        <div class="row" data-k="word select extend">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⇧</span>Shift</kbd><i class="p">+</i><kbd>←</kbd><i class="o">/</i><kbd>→</kbd></div>
+          <div class="what">Extend the selection one word</div>
+        </div>
+      </section>
+
+      <section class="group" aria-labelledby="g-shot">
+        <div class="group-head">
+          <span class="badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 2.5v15h15"/><path d="M2.5 6.5h15v15"/><circle cx="12" cy="12" r="2.2"/></svg></span>
+          <h2 id="g-shot">Screenshots</h2><span class="count">3</span>
+        </div>
+        <div class="row" data-k="print screen screenshot crop capture clipboard">
+          <div class="keys"><kbd>Print Screen</kbd></div>
+          <div class="what">Crop an area: saved <em>and</em> copied<span class="note">Drag to select, Esc to cancel. Shutter sound. Lands in ~/Pictures/Screenshots.</span></div>
+        </div>
+        <div class="row" data-k="screenshot toolbar record video">
+          <div class="keys"><kbd><span class="g">⌘</span>Cmd</kbd><i class="p">+</i><kbd><span class="g">⇧</span>Shift</kbd><i class="p">+</i><kbd>5</kbd></div>
+          <div class="what">Screenshot and recording toolbar<span class="tag">native</span></div>
+        </div>
+        <div class="row" data-k="screenshot crop clipboard only">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⌘</span>Cmd</kbd><i class="p">+</i><kbd><span class="g">⇧</span>Shift</kbd><i class="p">+</i><kbd>4</kbd></div>
+          <div class="what">Crop to the clipboard only<span class="tag">native</span></div>
+        </div>
+      </section>
+
+      <section class="group" aria-labelledby="g-finder">
+        <div class="group-head">
+          <span class="badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9.5 7V4.5h5V7M6 7l1 13h10l1-13M10 11v5.5M14 11v5.5"/></svg></span>
+          <h2 id="g-finder">Finder</h2><span class="count">2</span>
+        </div>
+        <div class="row" data-k="delete trash file finder remove">
+          <div class="keys"><kbd>Delete <span class="g">⌦</span></kbd></div>
+          <div class="what">Move the selection to the Trash<span class="note">Ignored while renaming or searching.</span></div>
+        </div>
+        <div class="row" data-k="delete permanently immediately finder remove">
+          <div class="keys"><kbd><span class="g">⇧</span>Shift</kbd><i class="p">+</i><kbd>Delete <span class="g">⌦</span></kbd></div>
+          <div class="what">Delete immediately, skipping the Trash<span class="note">Asks first. Cannot be undone.</span></div>
+        </div>
+      </section>
+
+      <section class="group" aria-labelledby="g-term">
+        <div class="group-head">
+          <span class="badge"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="16" rx="2.2"/><path d="m6.5 9.5 3 2.5-3 2.5M12 15h5"/></svg></span>
+          <h2 id="g-term">Ghostty terminal</h2><span class="count">4</span>
+        </div>
+        <div class="row" data-k="terminal new window ghostty">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⌘</span>Cmd</kbd><i class="p">+</i><kbd>T</kbd></div>
           <div class="what">New terminal window, from any app<span class="note">Like Ctrl+Alt+T on Ubuntu.</span></div>
         </div>
-        <div class="row">
-          <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>⇧ Shift</kbd><span class="plus">+</span><kbd>T</kbd> <span class="plus">/</span> <kbd>W</kbd></div>
+        <div class="row" data-k="terminal tab new close terminator">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⇧</span>Shift</kbd><i class="p">+</i><kbd>T</kbd><i class="o">/</i><kbd>W</kbd></div>
           <div class="what">New tab / close tab<span class="note">As in Terminator.</span></div>
         </div>
-        <div class="row">
-          <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>Tab</kbd><span class="plus">,</span> <kbd>Ctrl</kbd><span class="plus">+</span><kbd>⇧ Shift</kbd><span class="plus">+</span><kbd>Tab</kbd></div>
-          <div class="what">Next / previous tab</div>
+        <div class="row" data-k="terminal tab next previous switch">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd>Tab</kbd><span class="word">, add</span><kbd><span class="g">⇧</span>Shift</kbd></div>
+          <div class="what">Next / previous tab<span class="tag">built-in</span></div>
         </div>
-        <div class="row">
-          <div class="keys"><kbd>⌘ Cmd</kbd><span class="plus">+</span><kbd>`</kbd></div>
-          <div class="what">Drop-down Quick Terminal<span class="note">Like Guake.</span></div>
+        <div class="row" data-k="quick terminal dropdown guake">
+          <div class="keys"><kbd><span class="g">⌘</span>Cmd</kbd><i class="p">+</i><kbd>`</kbd></div>
+          <div class="what">Drop-down Quick Terminal<span class="note">Like Guake, from any app.</span></div>
+        </div>
+      </section>
+
+      <section class="group" aria-labelledby="g-session">
+        <div class="group-head">
+          <span class="badge"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9.5" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3M12 15v2"/></svg></span>
+          <h2 id="g-session">Session</h2><span class="count">3</span>
+        </div>
+        <div class="row" data-k="lock session screen win+l">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⌘</span>Cmd</kbd><i class="p">+</i><kbd>L</kbd></div>
+          <div class="what">Lock the session, like Win+L<span class="note">Password asked at once. Apps stay open.</span></div>
+        </div>
+        <div class="row" data-k="lock session screen">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⌘</span>Cmd</kbd><i class="p">+</i><kbd>Q</kbd></div>
+          <div class="what">Lock the session<span class="tag">native</span></div>
+        </div>
+        <div class="row" data-k="mission control expose windows">
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd>↑</kbd><i class="o">/</i><kbd>↓</kbd></div>
+          <div class="what">Mission Control / this app's windows<span class="tag">native</span><span class="note">Left as macOS has them.</span></div>
         </div>
       </section>
     </div>
+    <p class="empty" id="empty">No shortcut matches that. Try a key name like <kbd>Tab</kbd> or a word like "paste".</p>
 
-    <section aria-labelledby="h-session">
-      <h2 id="h-session">Finder and session</h2>
-      <div class="row">
-        <div class="keys"><kbd>Delete ⌦</kbd></div>
-        <div class="what">Finder: move the selected files to the Trash<span class="note">Ignored while renaming or typing in search.</span></div>
-      </div>
-      <div class="row">
-        <div class="keys"><kbd>⇧ Shift</kbd><span class="plus">+</span><kbd>Delete ⌦</kbd></div>
-        <div class="what">Finder: delete immediately, skipping the Trash<span class="note">Asks for confirmation first. Cannot be undone.</span></div>
-      </div>
-      <div class="row">
-        <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>⌘ Cmd</kbd><span class="plus">+</span><kbd>L</kbd></div>
-        <div class="what">Lock the session, like Win+L<span class="note">Password asked at once. Apps stay open.</span></div>
-      </div>
-      <div class="row">
-        <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>⌘ Cmd</kbd><span class="plus">+</span><kbd>Q</kbd></div>
-        <div class="what">Lock the session <span class="tag native">native</span></div>
-      </div>
-      <div class="row">
-        <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>↑</kbd><span class="or">/</span><kbd>↓</kbd></div>
-        <div class="what">Mission Control / windows of this app <span class="tag native">native</span><span class="note">Left as macOS has them.</span></div>
-      </div>
-    </section>
+    <aside class="tradeoffs" aria-labelledby="t-head">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 21.5 20h-19Z"/><path d="M12 10v4.5M12 17.2v.1"/></svg>
+      <h2 id="t-head">What Ctrl no longer does</h2>
+      <ul>
+        <li><strong>In terminals</strong> Ctrl+C copies instead of interrupting, so stop a command with <kbd>⌃ Ctrl</kbd>+<kbd>\</kbd>. Ctrl+Z undoes instead of suspending, Ctrl+B no longer reaches tmux, and Ctrl+A selects all instead of jumping to the line start: use <kbd>⌘ Cmd</kbd>+<kbd>←</kbd>.</li>
+        <li><strong>Cmd+Shift+3</strong> opens the crop tool too, because that is what the Print Screen key sends. Full screen to the clipboard is still <kbd>⌃ Ctrl</kbd>+<kbd>⌘ Cmd</kbd>+<kbd>⇧ Shift</kbd>+<kbd>3</kbd>.</li>
+        <li><strong>Ctrl+Cmd+←/→</strong> belongs to the system now, so apps that used it (moving an editor between groups in Cursor, for example) no longer get it.</li>
+      </ul>
+    </aside>
+
+    <footer>
+      <span>github.com/yupipi93/mac-muscle-memory · hammerspoon/init.lua · ghostty/config</span>
+      <span>Updated 24 Sep 2026</span>
+    </footer>
+    <p class="screen-only" style="margin:0 0 20px;font-size:12px;color:var(--ink-soft)">Prints on one A4 page: open docs/shortcuts.html from the repo in a browser and print.</p>
   </div>
-
-  <aside class="caveats" aria-labelledby="h-caveats">
-    <h2 id="h-caveats">What these shortcuts took away</h2>
-    <ul>
-      <li><strong>Terminals:</strong> Ctrl+C copies instead of interrupting, so stop a running command with <kbd>Ctrl</kbd>+<kbd>\</kbd>. Ctrl+Z undoes instead of suspending. Ctrl+B is bold, so it no longer reaches tmux or readline. Ctrl+A selects all instead of jumping to the line start, so use <kbd>⌘ Cmd</kbd>+<kbd>←</kbd> or Home.</li>
-      <li><strong>Cmd+Shift+3</strong> now opens the crop tool too, because that is what the Print Screen key sends. A full-screen shot to the clipboard is still <kbd>Ctrl</kbd>+<kbd>⌘ Cmd</kbd>+<kbd>⇧ Shift</kbd>+<kbd>3</kbd>.</li>
-      <li><strong>Ctrl+Cmd+←/→</strong> belongs to the system now, so apps that used it (moving an editor between groups in Cursor, for example) no longer get it.</li>
-    </ul>
-  </aside>
-
-  <footer>
-    <span>github.com/yupipi93/mac-muscle-memory · hammerspoon/init.lua</span>
-    <span>Updated 24 Sep 2026</span>
-  </footer>
-  <p class="screen-only" style="margin:10px 0 0;font-size:12px;color:var(--ink-soft)">To print on A4, open docs/shortcuts.html from the mac-muscle-memory repo in a browser.</p>
 </main>
+<script>
+  (function () {
+    var input = document.getElementById("filter");
+    var empty = document.getElementById("empty");
+    if (!input) return;
+    input.addEventListener("input", function () {
+      var q = input.value.trim().toLowerCase();
+      var any = false;
+      document.querySelectorAll(".group").forEach(function (group) {
+        var shown = 0;
+        group.querySelectorAll(".row").forEach(function (row) {
+          var hay = (row.textContent + " " + (row.getAttribute("data-k") || "")).toLowerCase();
+          var match = !q || hay.indexOf(q) !== -1;
+          row.hidden = !match;
+          if (match) shown++;
+        });
+        group.hidden = shown === 0;
+        if (shown) any = true;
+      });
+      empty.classList.toggle("show", !any);
+    });
+  })();
+</script>
 </body>
 </html>
