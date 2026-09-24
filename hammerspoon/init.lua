@@ -272,6 +272,59 @@ end
 hs.hotkey.bind({"ctrl", "alt"}, "left", function() moveWindowToScreen(-1) end)
 hs.hotkey.bind({"ctrl", "alt"}, "right", function() moveWindowToScreen(1) end)
 
+-- Colocar la ventana como en Ubuntu con la tecla Windows, que en macOS es Option (2026-09-24):
+--   Option+Izquierda / Derecha  -> mitad izquierda / derecha de su pantalla
+--   Option+Arriba               -> maximizada (sin pantalla completa)
+--   Option+Abajo                -> vuelve al tamano y sitio que tenia antes de colocarla
+-- Se guarda el marco original la primera vez que se coloca una ventana, como hace GNOME, para
+-- poder deshacer con Option+Abajo aunque se haya pasado por varias posiciones.
+-- Precio: Option+flecha deja de mover el cursor por palabras o parrafos de forma nativa. Para
+-- palabras ya esta Ctrl+flecha, que envia Option+flecha directamente a la app y no pasa por aqui.
+local tileRestore = {}
+
+local function tileWindow(where)
+    local win = hs.window.focusedWindow()
+    if not win or win:isFullScreen() then return end
+    local id = win:id()
+    if where == "restore" then
+        local original = tileRestore[id]
+        if original then
+            win:setFrame(original, 0)
+            tileRestore[id] = nil
+        end
+        return
+    end
+    if not tileRestore[id] then tileRestore[id] = win:frame() end
+    local s = win:screen():frame()
+    local frames = {
+        left  = { x = s.x, y = s.y, w = s.w / 2, h = s.h },
+        right = { x = s.x + s.w / 2, y = s.y, w = s.w / 2, h = s.h },
+        max   = { x = s.x, y = s.y, w = s.w, h = s.h },
+    }
+    win:setFrame(frames[where], 0)
+end
+
+-- No se usa hs.hotkey: un atajo global de Option+flecha se tragaba tambien el Option+flecha que
+-- Ctrl+flecha envia a la app para saltar palabras, y ese dejaba de funcionar (medido). Un event
+-- tap puede mirar QUIEN envia la pulsacion: si la genera el propio Hammerspoon es esa conversion
+-- y se deja pasar; si viene del teclado, se coloca la ventana.
+local TILE_KEYS = {
+    [hs.keycodes.map.left] = "left", [hs.keycodes.map.right] = "right",
+    [hs.keycodes.map.up] = "max", [hs.keycodes.map.down] = "restore",
+}
+local OWN_PID = hs.processInfo.processID
+
+tileTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
+    local where = TILE_KEYS[event:getKeyCode()]
+    if not where then return false end
+    local f = event:getFlags()
+    if not f.alt or f.cmd or f.ctrl or f.shift then return false end
+    if event:getProperty(hs.eventtap.event.properties.eventSourceUnixProcessID) == OWN_PID then return false end
+    tileWindow(where)
+    return true
+end)
+tileTap:start()
+
 -- Bloquear la sesion con Ctrl+Cmd+L, al estilo del Win+L / Ctrl+Alt+L de Windows y Ubuntu.
 -- Primero fue Ctrl+Alt+L; se probo, funcionaba, y se prefirio Ctrl+Cmd+L (2026-09-24).
 -- Ningun atajo de sistema usa esa combinacion. El nativo de macOS es Ctrl+Cmd+Q y sigue ahi.

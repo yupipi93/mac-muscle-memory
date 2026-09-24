@@ -88,6 +88,17 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-09-24, place windows with the Windows key, Ubuntu style
+
+- **Option+Left / Right** put the focused window on the left or right half of its screen,
+  **Option+Up** maximizes it, **Option+Down** returns it to the frame it had before, as
+  Super+Arrow does on Ubuntu. On a Windows keyboard, Option is the Windows key.
+- A first version with `hs.hotkey` swallowed the Option+Arrow that Ctrl+Arrow sends to jump a
+  word; found with real key presses, not synthetic ones, which never reach hotkeys. Rebuilt as an
+  event tap that lets Hammerspoon's own posts through. Both verified with real presses.
+- Card: two new rows and a trade-off line, still one A4 page after rebalancing the columns and a
+  slightly smaller print size.
+
 ## 2026-09-24, Ctrl+Backspace deletes a word
 
 - **Ctrl+Backspace** deletes the previous word in every app, sent as Option+Backspace, as on

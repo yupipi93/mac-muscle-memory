@@ -418,6 +418,29 @@ Verified:
 
 `PRIMARY_ENABLED = false` in `init.lua` turns it off.
 
+## Place windows like Ubuntu: Option+Arrow
+
+The Windows key of a Windows keyboard is Option on macOS, so this is Super+Arrow from Ubuntu:
+
+| Keys | Window goes to |
+|------|----------------|
+| Option+Left / Right | left / right half of its screen |
+| Option+Up | the whole screen, not full-screen mode: the Dock and menu bar stay |
+| Option+Down | back to the size and place it had before it was first placed |
+
+The original frame is remembered per window the first time it is placed, as GNOME does, so
+Option+Down undoes a whole series of placements.
+
+**Why it is an event tap and not a hotkey.** The first version used `hs.hotkey` on Option+Arrow.
+Measured with real key presses: it also swallowed the Option+Arrow that Ctrl+Arrow sends to the
+app to jump a word, so Ctrl+Left stopped moving the cursor. The event tap checks who sent the key
+(`eventSourceUnixProcessID`): Hammerspoon's own posts are that conversion and pass through, key
+presses from the keyboard place the window. Verified afterwards: half left, half right, maximize
+and restore on TextEdit, and Ctrl+Left / Ctrl+Shift+Left still jump and select a word.
+
+Cost: Option+Arrow no longer moves the cursor by word or paragraph natively. Ctrl+Arrow does the
+word part.
+
 ## Next window of the same app: Option+Tab
 
 | Symbolic hotkey | Action | Default | Now |

@@ -301,32 +301,32 @@
       --cap-top: #ffffff; --cap-bottom: #f1f2f4; --cap-edge: #8b929d; --cap-ink: #000000; --cap-glyph: #5b6270;
       --warn: #6b4600; --warn-soft: #fff5e1; --tag: #3d4450; --tag-soft: #eceef1;
     }
-    body { padding: 0; font-size: 10.4px; line-height: 1.36; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { padding: 0; font-size: 9.8px; line-height: 1.32; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .sheet { border: 0; border-radius: 0; max-width: none; }
     .inner { padding: 0; }
-    .hero { grid-template-columns: minmax(0, 1fr) 210px; padding-block: 0 10px; gap: 14px; }
+    .hero { grid-template-columns: minmax(0, 1fr) 180px; padding-block: 0 8px; gap: 14px; }
     .eyebrow { font-size: 9px; margin-bottom: 4px; }
-    h1 { font-size: 25px; }
-    .lede { font-size: 10.4px; margin-top: 5px; max-width: none; }
+    h1 { font-size: 22px; }
+    .lede { font-size: 9.8px; margin-top: 5px; max-width: none; }
     .bar .filter, .bar .stats, .kbswitch, .screen-only { display: none; }
     .print-mode { display: inline; }
     .kbnote { font-size: 9.2px; margin-top: 4px; }
     .bar { padding-block: 0; border: 0; }
-    .legend { margin-top: 7px; font-size: 9.6px; }
-    .groups { grid-template-columns: 1fr 1fr; gap: 11px 20px; padding-block: 10px 0; }
-    .col { gap: 11px; }
+    .legend { margin-top: 5px; font-size: 9px; }
+    .groups { grid-template-columns: 1fr 1fr; gap: 9px 20px; padding-block: 8px 0; }
+    .col { gap: 9px; }
     .group-head { gap: 7px; margin-bottom: 1px; }
     .badge { width: 24px; height: 24px; border-radius: 6px; }
     .badge svg { width: 15px; height: 15px; stroke-width: 2; }
     h2 { font-size: 13px; }
     .count { font-size: 9px; }
     .row { grid-template-columns: minmax(0, 12.6rem) minmax(0, 1fr); padding: 2px 0; gap: 1px 10px; }
-    kbd { font-size: 9.1px; padding: 1px 5px 0; border-bottom-width: 2px; border-radius: 4px; gap: 3px; }
+    kbd { font-size: 8.7px; padding: 1px 5px 0; border-bottom-width: 2px; border-radius: 4px; gap: 3px; }
     .keys { gap: 2px; }
     .keys .p, .keys .o { font-size: 9.4px; }
     .keys .word { font-size: 10px; }
-    .what { font-size: 10.4px; }
-    .note { font-size: 9.3px; margin-top: 0; }
+    .what { font-size: 9.8px; }
+    .note { font-size: 8.8px; margin-top: 0; }
     .tag { font-size: 8px; padding: 0 4px; }
     .tradeoffs { margin-top: 11px; padding: 7px 11px; gap: 2px 10px; border-radius: 8px; }
     .tradeoffs svg { width: 15px; height: 15px; }
@@ -431,7 +431,7 @@
         <section class="group" aria-labelledby="g-desk">
           <div class="group-head">
             <span class="badge"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="12" height="9" rx="1.6"/><rect x="9.5" y="10" width="12" height="9" rx="1.6"/><path d="M5.5 16.5h2M18.5 7.5v-2"/></svg></span>
-            <h2 id="g-desk">Desktops, windows, monitors</h2><span class="count">5</span>
+            <h2 id="g-desk">Desktops, windows, monitors</h2><span class="count">7</span>
           </div>
           <div class="row" data-k="space mission switch next previous">
             <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd class="dual"><span class="lm"><span class="g">⌘</span>Cmd</span><span class="lw">Alt</span></kbd><i class="p">+</i><kbd>←</kbd><i class="o">/</i><kbd>→</kbd></div>
@@ -444,6 +444,14 @@
           <div class="row" data-k="monitor screen display move">
             <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd class="dual"><span class="lm"><span class="g">⌥</span>Opt</span><span class="lw"><span class="g">⊞</span>Win</span></kbd><i class="p">+</i><kbd>←</kbd><i class="o">/</i><kbd>→</kbd></div>
             <div class="what">Window to the monitor on that side<span class="note">Same desktop, rescaled to fit.</span></div>
+          </div>
+          <div class="row" data-k="tile snap half left right window win super">
+            <div class="keys"><kbd class="dual"><span class="lm"><span class="g">⌥</span>Opt</span><span class="lw"><span class="g">⊞</span>Win</span></kbd><i class="p">+</i><kbd>←</kbd><i class="o">/</i><kbd>→</kbd></div>
+            <div class="what">Window to the left / right half<span class="note">Like Super+Arrow on Ubuntu.</span></div>
+          </div>
+          <div class="row" data-k="maximize restore window win super">
+            <div class="keys"><kbd class="dual"><span class="lm"><span class="g">⌥</span>Opt</span><span class="lw"><span class="g">⊞</span>Win</span></kbd><i class="p">+</i><kbd>↑</kbd><i class="o">/</i><kbd>↓</kbd></div>
+            <div class="what">Maximize / back to its size before<span class="note">Not full screen: the Dock and menu bar stay.</span></div>
           </div>
           <div class="row" data-k="cycle windows same app alt tab option">
             <div class="keys"><kbd class="dual"><span class="lm"><span class="g">⌥</span>Opt</span><span class="lw"><span class="g">⊞</span>Win</span></kbd><i class="p">+</i><kbd>Tab</kbd><span class="word">, add</span><kbd><span class="g">⇧</span>Shift</kbd></div>
@@ -587,6 +595,7 @@
       <h2 id="t-head">What Ctrl no longer does</h2>
       <ul>
         <li><strong>In terminals</strong> Ctrl+C copies instead of interrupting, so stop a command with <kbd>⌃ Ctrl</kbd>+<kbd>\</kbd>. Ctrl+Z undoes instead of suspending, Ctrl+B no longer reaches tmux, and Ctrl+A selects all instead of jumping to the line start: use <kbd class="dual"><span class="lm"><span class="g">⌘</span>Cmd</span><span class="lw">Alt</span></kbd>+<kbd>←</kbd>.</li>
+        <li><strong>Option+arrows</strong> place windows now, so they no longer move the cursor by word or paragraph; Ctrl+arrows do that.</li>
         <li><strong>Cmd+Shift+3</strong> opens the crop tool too, because that is what the Print Screen key sends. Full screen to the clipboard is still <kbd>⌃ Ctrl</kbd>+<kbd class="dual"><span class="lm"><span class="g">⌘</span>Cmd</span><span class="lw">Alt</span></kbd>+<kbd>⇧ Shift</kbd>+<kbd>3</kbd>.</li>
         <li><strong>Ctrl+Cmd+←/→</strong> belongs to the system now, so apps that used it (moving an editor between groups in Cursor, for example) no longer get it.</li>
       </ul>
