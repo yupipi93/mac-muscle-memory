@@ -623,9 +623,12 @@ dockScrollTap:start()
 -- lo suyo: abrir un enlace en otra pestana, cerrar una pestana. Como en Ubuntu, primero se
 -- coloca el cursor donde esta el puntero y luego se pega.
 local PRIMARY_ENABLED = true
-local PRIMARY_CAPTURE_ROLES = {
-    AXTextArea = true, AXTextField = true, AXComboBox = true, AXSearchField = true,
-    AXWebArea = true, AXStaticText = true,
+-- Si el arrastre empieza sobre uno de estos, no es una seleccion de texto: mover una ventana,
+-- una barra de desplazamiento, un separador. No se captura.
+local PRIMARY_NOT_TEXT_ROLES = {
+    AXWindow = true, AXToolbar = true, AXButton = true, AXScrollBar = true, AXSplitter = true,
+    AXTabGroup = true, AXRadioButton = true, AXSlider = true, AXImage = true, AXMenuBar = true,
+    AXMenuBarItem = true, AXDockItem = true, AXList = true, AXPopUpButton = true, AXCheckBox = true,
 }
 local PRIMARY_EDITABLE_ROLES = { AXTextArea = true, AXTextField = true, AXComboBox = true, AXSearchField = true }
 -- Apps donde el boton central pega en cualquier punto de la ventana. Chrome y las apps Electron
@@ -658,42 +661,68 @@ local function axFocused()
     return ok and el or nil
 end
 
-local function capturePrimary()
+local function selectedTextOf(el)
+    if not el then return nil end
+    local ok, t = pcall(function() return el:attributeValue("AXSelectedText") end)
+    if ok and type(t) == "string" and #t > 0 then return t end
+    return nil
+end
+
+local function elementAt(pos)
+    if not pos then return nil end
+    local ok, el = pcall(function() return hs.axuielement.systemElementAtPosition(pos) end)
+    return ok and el or nil
+end
+
+-- Captura CUALQUIER texto seleccionado, este donde este: un campo, una pagina, una etiqueta, un
+-- mensaje. Primero por accesibilidad, mirando el elemento con el foco y despues el que hay bajo
+-- el puntero y sus contenedores, que es donde vive el texto no editable. Si nadie la expone, se
+-- copia y se restaura el portapapeles.
+local function capturePrimary(downAt, upAt)
     if primaryCapturing then return end
     if screenshotInProgress then plog("captura: omitida, hay una captura de pantalla en curso"); return end
     local app = hs.application.frontmostApplication()
-    if app and app:bundleID() == "com.apple.screencaptureui" then return end
-    local el = axFocused()
-    local role = el and el:attributeValue("AXRole")
     local bundle = app and app:bundleID()
+    if bundle == "com.apple.screencaptureui" then return end
     if PRIMARY_IGNORE_APPS[bundle] then plog("captura: omitida en " .. tostring(bundle)); return end
-    -- Sin rol es que la app no expone accesibilidad (Chrome, Electron): se intenta igualmente.
-    -- Con rol, solo si es algo que contiene texto.
-    if role and not (PRIMARY_CAPTURE_ROLES[role] or PRIMARY_PASTE_ANYWHERE_APPS[bundle]) then
-        plog("captura: omitida, " .. tostring(bundle) .. " rol " .. tostring(role) .. " no es texto")
+
+    local startEl = elementAt(downAt)
+    local startRole = startEl and startEl:attributeValue("AXRole")
+    if startRole and PRIMARY_NOT_TEXT_ROLES[startRole] then
+        plog("captura: omitida, el arrastre empezo sobre " .. startRole)
         return
     end
 
-    local selected = el and el:attributeValue("AXSelectedText")
-    if type(selected) == "string" and #selected > 0 then
-        primaryText = selected
-        plog("captura: por accesibilidad en " .. tostring(bundle) .. ", " .. #selected .. " caracteres")
+    local text = selectedTextOf(axFocused())
+    if not text then
+        local el = elementAt(upAt) or startEl
+        for _ = 1, 6 do
+            if not el then break end
+            text = selectedTextOf(el)
+            if text then break end
+            local ok, parent = pcall(function() return el:attributeValue("AXParent") end)
+            el = ok and parent or nil
+        end
+    end
+    if text then
+        primaryText = text
+        plog("captura: por accesibilidad en " .. tostring(bundle) .. ", " .. #text .. " caracteres")
         return
     end
 
-    -- La app no expone la seleccion: se copia y se restaura el portapapeles.
+    -- Nadie expone la seleccion: se copia y se restaura el portapapeles.
     primaryCapturing = true
     local saved = hs.pasteboard.readAllData()
     local before = hs.pasteboard.changeCount()
     hs.eventtap.keyStroke({ "cmd" }, "c", 0, app)
     hs.timer.doAfter(0.15, function()
         if hs.pasteboard.changeCount() ~= before and not screenshotInProgress then
-            local text = hs.pasteboard.readString()
-            if text and #text > 0 then primaryText = text end
+            local copied = hs.pasteboard.readString()
+            if copied and #copied > 0 then primaryText = copied end
             if saved then hs.pasteboard.writeAllData(saved) end
-            plog("captura: copiando en " .. tostring(bundle) .. ", " .. (text and #text or 0) .. " caracteres")
+            plog("captura: copiando en " .. tostring(bundle) .. ", " .. (copied and #copied or 0) .. " caracteres")
         else
-            plog("captura: la copia en " .. tostring(bundle) .. " no produjo nada")
+            plog("captura: nada que copiar en " .. tostring(bundle) .. " (rol de inicio " .. tostring(startRole) .. ")")
         end
         primaryCapturing = false
     end)
@@ -735,7 +764,8 @@ primaryTap = hs.eventtap.new({ MT.leftMouseDown, MT.leftMouseUp, MT.otherMouseDo
         local clicks = event:getProperty(P.mouseEventClickState) or 1
         local moved = primaryDownAt and (math.abs(pos.x - primaryDownAt.x) + math.abs(pos.y - primaryDownAt.y) > 4)
         if moved or clicks >= 2 or event:getFlags().shift then
-            hs.timer.doAfter(0.08, capturePrimary)
+            local downAt = primaryDownAt
+            hs.timer.doAfter(0.08, function() capturePrimary(downAt, pos) end)
         end
         return false
     end

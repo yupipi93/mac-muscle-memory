@@ -88,6 +88,17 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-09-24, primary selection captures any text, editable or not
+
+- The capture only ran when the focus was on a text element, so selecting text in a web page
+  heading, a label or a message did nothing. It now reads the selection from the focused
+  element, then from the element under the pointer and its containers, and falls back to
+  copy-and-restore in any app except Finder.
+- A drag that starts on a title bar, button, scroll bar, splitter or the Dock is not treated as
+  a selection.
+- Verified in Safari: double-clicking a word of the page heading captured `Ubuntu`, the normal
+  clipboard stayed `NORMAL`.
+
 ## 2026-09-24, screenshots reach the clipboard again, Ghostty splits documented
 
 - **Bug fixed, introduced by the primary selection**: the Print Screen crop drag looked like a

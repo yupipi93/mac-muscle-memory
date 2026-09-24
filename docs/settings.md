@@ -358,16 +358,21 @@ The X11 primary selection that Ubuntu users rely on, added 2026-09-24. Selecting
 to a **second clipboard**; the middle mouse button pastes it. Ctrl+C / Ctrl+V and the normal
 clipboard are never affected.
 
-**Capture.** After a drag, a double or triple click, or a Shift+click, `init.lua` reads the
-selection:
+**Capture: any selected text, wherever it is.** After a drag, a double or triple click, or a
+Shift+click, `init.lua` reads the selection. Editable or not: a field, a web page, a label, a
+message, a terminal.
 
-1. Through Accessibility (`AXSelectedText` of the focused element), which touches nothing.
-2. If the app does not expose it (Chrome and Electron apps report no focused element at all,
-   terminals expose no selection), it sends Cmd+C and restores the clipboard straight after,
-   every type, from `hs.pasteboard.readAllData()`.
+1. Through Accessibility (`AXSelectedText`), which touches nothing: first the focused element,
+   then the element under the pointer and up to six of its containers, which is where
+   non-editable text lives.
+2. If nothing exposes the selection (Chrome and Electron apps expose nothing, terminals no
+   selection), it sends Cmd+C and restores the clipboard straight after, every type, from
+   `hs.pasteboard.readAllData()`.
 
-It only tries when the focused element holds text, or when the app exposes no accessibility at
-all. Finder is excluded outright: dragging there selects files.
+It does not try when the drag started on something that is not text (a title bar, a button, a
+scroll bar, a splitter, the Dock), nor in Finder, where dragging selects files. The first version
+only captured when the focus was on a text element, which missed exactly the non-editable text
+people most often want to grab; fixed on 2026-09-24.
 
 **Paste.** Only where there is something editable under the pointer, as Ubuntu does: a text
 field, a text area, a web editor with an editable ancestor, or an app in
@@ -408,6 +413,7 @@ Verified:
 | same | drag across `gamma` | second clipboard `gamma`, clipboard still `NORMAL` |
 | same | middle-click after the text | document `alfa beta gammabeta`, clipboard still `NORMAL` |
 | Chrome, a web page | double-click a word | captured through the copy-and-restore path, clipboard restored |
+| Safari, a page heading (not editable) | double-click a word | `Ubuntu` captured, clipboard still `NORMAL` |
 
 `PRIMARY_ENABLED = false` in `init.lua` turns it off.
 
