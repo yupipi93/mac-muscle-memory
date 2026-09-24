@@ -88,6 +88,15 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-09-24, Option+Tab for the next window of the same app
+
+- Symbolic hotkey 27, "move focus to next window", rebound from Cmd+` to **Option+Tab**, like
+  Alt+` on GNOME. Shift reverses it. Native behaviour, only moved; it also frees Cmd+` for
+  Ghostty's Quick Terminal.
+- Verified with three Chrome windows: Option+Tab visited each in turn, Option+Shift+Tab went
+  back. Backup of the previous shortcuts taken first; `apply.sh` writes it, `capture.sh` checks it.
+- Shortcut card updated, still one A4 page (print sizes tightened slightly).
+
 ## 2026-09-24, Ctrl+B for bold
 
 - **Ctrl+B** bolds the selected text in every app, posted as Cmd+B. Verified in TextEdit:

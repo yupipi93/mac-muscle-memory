@@ -42,6 +42,7 @@ the way so nobody has to rediscover it.
 | <kbd>Ctrl</kbd> <kbd>Cmd</kbd> <kbd>←</kbd> <kbd>→</kbd> | switch desktop, about 0.13 s | Ctrl+Arrow, about 1.2 s |
 | <kbd>Ctrl</kbd> <kbd>Cmd</kbd> <kbd>Shift</kbd> <kbd>←</kbd> <kbd>→</kbd> | take the window to the next desktop | drag it to the screen edge and wait |
 | <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>←</kbd> <kbd>→</kbd> | move the window to the next monitor | drag it across |
+| <kbd>Option</kbd> <kbd>Tab</kbd>, add <kbd>Shift</kbd> to go back | next window of the same app, like Alt+` on GNOME | Cmd+` |
 | <kbd>Ctrl</kbd> <kbd>Cmd</kbd> <kbd>L</kbd> | lock the session, like Win+L | Ctrl+Cmd+Q |
 | <kbd>Ctrl</kbd> <kbd>Cmd</kbd> <kbd>T</kbd> | new terminal window, like Ctrl+Alt+T | nothing |
 | <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>T</kbd> / <kbd>W</kbd> in Ghostty | new tab / close tab, as in Terminator | Cmd+T / Cmd+W |

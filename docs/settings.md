@@ -351,6 +351,20 @@ Possible conflict: some apps use Ctrl+Cmd+Left / Right themselves, for example V
 editors for moving an editor between groups. The system shortcut wins, so those app bindings no
 longer fire.
 
+## Next window of the same app: Option+Tab
+
+| Symbolic hotkey | Action | Default | Now |
+|-----------------|--------|---------|-----|
+| 27 | Move focus to next window (of the frontmost app) | Cmd+` | **Option+Tab**, add Shift to go back |
+
+Native macOS behaviour, only rebound, like Alt+` on GNOME: with three Chrome windows open,
+Option+Tab walked through all three and Option+Shift+Tab stepped back. Stored as
+`[65535, 48, 524288]` (Tab, Option). Written by `bin/apply.sh` next to 79 and 81, applied live with
+`activateSettings -u`, checked by `bin/capture.sh`.
+
+Moving it off Cmd+` also leaves that combination to Ghostty's Quick Terminal, which binds it
+globally. Nothing in the system used Option+Tab before.
+
 ## Moving a window between desktops, fast
 
 Ctrl+Cmd+Shift+Left / Right. Rewritten on 2026-09-24 because it took too long to start.

@@ -37,14 +37,15 @@ check com.apple.screencapture location "$HOME/Pictures/Screenshots"
 spacekeys="$(python3 -c '
 import plistlib, subprocess
 d = plistlib.loads(subprocess.run(["defaults","export","com.apple.symbolichotkeys","-"],capture_output=True).stdout).get("AppleSymbolicHotKeys", {})
-ok = all([int(x) for x in (d.get(k, {}).get("value", {}).get("parameters") or [0,0,0])][2] == 9699328 for k in ("79", "81"))
+p = lambda k: [int(x) for x in (d.get(k, {}).get("value", {}).get("parameters") or [0, 0, 0])]
+ok = all(p(k)[2] == 9699328 for k in ("79", "81")) and p("27")[1:] == [48, 524288]
 print("ctrl+cmd" if ok else "NOT ctrl+cmd")
 ' 2>/dev/null)"
 if [ "$spacekeys" = "ctrl+cmd" ]; then
-    printf '  ok    %-46s %s\n' "desktop switch shortcut (79/81)" "Ctrl+Cmd+Arrow"
+    printf '  ok    %-46s %s\n' "system shortcuts (79/81/27)" "Ctrl+Cmd+Arrow, Option+Tab"
     pass=$((pass + 1))
 else
-    printf '  DRIFT %-46s %s (expected Ctrl+Cmd+Arrow)\n' "desktop switch shortcut (79/81)" "$spacekeys"
+    printf '  DRIFT %-46s %s (expected Ctrl+Cmd+Arrow)\n' "system shortcuts (79/81/27)" "$spacekeys"
     fail=$((fail + 1))
 fi
 

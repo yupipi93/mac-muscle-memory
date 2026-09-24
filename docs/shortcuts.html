@@ -211,7 +211,7 @@
       --cap-face: #ffffff; --cap-edge: #7d8591; --cap-shadow: #ffffff;
       --warn: #6b4600; --warn-soft: #fbf1dc; --native: #3f4650; --native-soft: #eceef1;
     }
-    body { padding: 0; font-size: 10.2px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { padding: 0; font-size: 9.8px; line-height: 1.38; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .sheet { border: 0; padding: 0; max-width: none; }
     h1 { font-size: 24px; }
     .grid { grid-template-columns: 1fr 1fr; gap: 10px 20px; margin-top: 10px; }
@@ -219,9 +219,11 @@
     header.masthead { padding-bottom: 8px; }
     .lede, .legend { margin-top: 6px; }
     .row { grid-template-columns: minmax(0, 12.6rem) minmax(0, 1fr); padding: 2px 0; gap: 1px 10px; }
-    kbd { font-size: 9px; padding: 0 4px 1px; box-shadow: none; }
-    .note { font-size: 9.4px; margin-top: 0; }
-    .caveats { margin-top: 16px; padding: 8px 12px; }
+    kbd { font-size: 8.6px; padding: 0 4px 0; line-height: 1.45; box-shadow: none; }
+    .note { font-size: 9px; margin-top: 0; }
+    .caveats { margin-top: 12px; padding: 6px 10px; }
+    .caveats ul { gap: 2px; margin-top: 3px; }
+    footer { margin-top: 10px; padding-top: 6px; }
     .stack { gap: 10px 0; }
     .screen-only { display: none; }
   }
@@ -253,6 +255,10 @@
       <div class="row">
         <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>⌥ Alt</kbd><span class="plus">+</span><kbd>←</kbd><span class="plus">/</span><kbd>→</kbd></div>
         <div class="what">Move the focused window to the monitor on that side<span class="note">Same desktop. Rescaled to the new screen. Stops at the edge monitor.</span></div>
+      </div>
+      <div class="row">
+        <div class="keys"><kbd>⌥ Alt</kbd><span class="plus">+</span><kbd>Tab</kbd>, add <kbd>⇧ Shift</kbd></div>
+        <div class="what">Next / previous window of the same app <span class="tag native">native</span><span class="note">Moved from Cmd+`, like Alt+` on GNOME.</span></div>
       </div>
       <div class="row">
         <div class="keys"><span class="tag gesture">mouse</span> wheel over the Dock</div>

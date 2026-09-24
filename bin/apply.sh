@@ -44,10 +44,13 @@ hk = d.setdefault("AppleSymbolicHotKeys", {})
 mask = 0x40000 | 0x100000 | 0x800000
 for key, arrow in (("79", 123), ("81", 124)):
     hk[key] = {"enabled": True, "value": {"parameters": [65535, arrow, mask], "type": "standard"}}
+# 27, "move focus to next window" of the same app: Option+Tab instead of Cmd+`, like
+# Alt+` on GNOME. Frees Cmd+` for Ghostty's Quick Terminal. Shift reverses it.
+hk["27"] = {"enabled": True, "value": {"parameters": [65535, 48, 0x80000], "type": "standard"}}
 subprocess.run(["defaults", "import", "com.apple.symbolichotkeys", "-"], input=plistlib.dumps(d), check=True)
 PYEOF
 /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u >/dev/null 2>&1 || true
-ok "desktop switch shortcut set to Ctrl+Cmd+Arrow"
+ok "desktop switch set to Ctrl+Cmd+Arrow, next window of an app to Option+Tab"
 
 say "Tooling"
 if ! command -v brew >/dev/null 2>&1; then
