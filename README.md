@@ -35,17 +35,21 @@ the way so nobody has to rediscover it.
 |------|------|----------------|
 | <kbd>Ctrl</kbd> <kbd>C</kbd> / <kbd>X</kbd> / <kbd>V</kbd> / <kbd>Z</kbd> / <kbd>A</kbd> / <kbd>B</kbd> | copy, cut, paste, undo, select all, bold, in every app | Cmd instead of Ctrl |
 | <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>V</kbd> | paste without formatting, in every app | a different shortcut per app, or none |
+| Select text, then middle-click | paste the last selection, Linux style, from a second clipboard that Ctrl+C / Ctrl+V never touch | nothing |
 | <kbd>Ctrl</kbd> <kbd>←</kbd> <kbd>→</kbd>, add <kbd>Shift</kbd> to select | jump and select by word | Option+Arrow |
 | <kbd>Print Screen</kbd> | crop an area, save it **and** copy it | no such key |
 | <kbd>Delete</kbd> / <kbd>Shift</kbd> <kbd>Delete</kbd> in Finder | move to Trash / delete immediately, with confirmation | Cmd+Backspace / Option+Cmd+Backspace |
 | Mouse wheel over the Dock | previous / next desktop, like the Ubuntu dock | nothing |
 | <kbd>Ctrl</kbd> <kbd>Cmd</kbd> <kbd>←</kbd> <kbd>→</kbd> | switch desktop, about 0.13 s | Ctrl+Arrow, about 1.2 s |
 | <kbd>Ctrl</kbd> <kbd>Cmd</kbd> <kbd>Shift</kbd> <kbd>←</kbd> <kbd>→</kbd> | take the window to the next desktop | drag it to the screen edge and wait |
-| <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>←</kbd> <kbd>→</kbd> | move the window to the next monitor | drag it across |
+| <kbd>Ctrl</kbd> <kbd>Option</kbd> <kbd>←</kbd> <kbd>→</kbd> | move the window to the next monitor | drag it across |
 | <kbd>Option</kbd> <kbd>Tab</kbd>, add <kbd>Shift</kbd> to go back | next window of the same app, like Alt+` on GNOME | Cmd+` |
 | <kbd>Ctrl</kbd> <kbd>Cmd</kbd> <kbd>L</kbd> | lock the session, like Win+L | Ctrl+Cmd+Q |
 | <kbd>Ctrl</kbd> <kbd>Cmd</kbd> <kbd>T</kbd> | new terminal window, like Ctrl+Alt+T | nothing |
 | <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>T</kbd> / <kbd>W</kbd> in Ghostty | new tab / close tab, as in Terminator | Cmd+T / Cmd+W |
+
+**Using a Windows keyboard?** In Mac mode, Cmd is its Alt key and Option is its Windows key. The
+shortcut card prints both names on every key and has a **Mac / Windows keyboard** switch.
 
 Plus: the mouse wheel scrolls like Windows and Linux, desktops keep a fixed order, screenshots
 land in `~/Pictures/Screenshots` instead of the Desktop, and Ghostty is set up with Linux

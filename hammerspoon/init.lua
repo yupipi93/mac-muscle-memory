@@ -245,7 +245,8 @@ hs.hotkey.bind({"ctrl", "cmd", "shift"}, "left", function() moveFocusedWindowToS
 hs.hotkey.bind({"ctrl", "cmd", "shift"}, "right", function() moveFocusedWindowToSpace(1) end)
 
 -- Mover la ventana enfocada al monitor de al lado.
--- Ctrl+Alt+Left / Ctrl+Alt+Right
+-- Ctrl+Option+Left / Ctrl+Option+Right ("alt" en Hammerspoon es la tecla Option; en un teclado
+-- Windows en modo Mac es la tecla Windows, no la Alt).
 --
 -- Esto no tiene nada que ver con los escritorios: cambiar de monitor es mover un marco por
 -- la geometria de las pantallas, asi que no depende de ninguna de las APIs rotas.
@@ -354,13 +355,9 @@ local arrowKeyCodes = {
 -- lo que copiaste.
 local PLAIN_PASTE_RESTORE_DELAY = 0.4
 
-local function pastePlain(app)
-    local text = hs.pasteboard.readString()
-    if not text then
-        -- Sin texto (una imagen, un fichero): no hay formato que quitar, pegado normal.
-        hs.eventtap.keyStroke({ "cmd" }, "v", 0, app)
-        return
-    end
+-- Pega un texto cualquiera y deja el portapapeles como estaba. Lo usan el pegado sin formato
+-- y el pegado de la seleccion primaria con el boton central.
+local function pastePreservingClipboard(text, app)
     local saved = hs.pasteboard.readAllData()
     hs.pasteboard.setContents(text)
     local ours = hs.pasteboard.changeCount()
@@ -370,6 +367,16 @@ local function pastePlain(app)
             hs.pasteboard.writeAllData(saved)
         end
     end)
+end
+
+local function pastePlain(app)
+    local text = hs.pasteboard.readString()
+    if not text then
+        -- Sin texto (una imagen, un fichero): no hay formato que quitar, pegado normal.
+        hs.eventtap.keyStroke({ "cmd" }, "v", 0, app)
+        return
+    end
+    pastePreservingClipboard(text, app)
 end
 
 -- Modificar las banderas del evento con setFlags y dejarlo pasar NO funciona: el sistema lo
@@ -596,6 +603,132 @@ end)
 dockScrollTap:start()
 
 -- Expuesto para probar desde la terminal: hs -c "dockScroll.switch(1)"
+-- Seleccion primaria al estilo de Linux (2026-09-24): seleccionar texto lo copia a un
+-- portapapeles APARTE, y el boton central del raton lo pega. Ctrl+C / Ctrl+V no se enteran.
+--
+-- Captura: tras un arrastre, un doble o triple clic, o un Shift+clic, se lee lo seleccionado.
+-- Primero por accesibilidad (AXSelectedText), que no toca nada. Si la app no lo expone, como
+-- las paginas web o los terminales, se hace un Cmd+C y se restaura el portapapeles al momento.
+-- Solo se intenta si el foco esta en algo que contiene texto, para no copiar ficheros al
+-- arrastrar en Finder ni nada parecido.
+--
+-- Pegado: solo si bajo el puntero hay algo editable (campo, area de texto, editor web) o una
+-- app de PRIMARY_PASTE_ANYWHERE_APPS. En cualquier otro sitio el clic central sigue haciendo
+-- lo suyo: abrir un enlace en otra pestana, cerrar una pestana. Como en Ubuntu, primero se
+-- coloca el cursor donde esta el puntero y luego se pega.
+local PRIMARY_ENABLED = true
+local PRIMARY_CAPTURE_ROLES = {
+    AXTextArea = true, AXTextField = true, AXComboBox = true, AXSearchField = true,
+    AXWebArea = true, AXStaticText = true,
+}
+local PRIMARY_EDITABLE_ROLES = { AXTextArea = true, AXTextField = true, AXComboBox = true, AXSearchField = true }
+-- Apps donde el boton central pega en cualquier punto de la ventana. Chrome y las apps Electron
+-- (Cursor, VS Code) no exponen por accesibilidad si bajo el puntero hay un campo de texto o un
+-- enlace, asi que por defecto NO pegan: romperia "abrir enlace en otra pestana" y "cerrar
+-- pestana". Anadelas aqui si prefieres pegar siempre. Su bundle id: osascript -e 'id of app "X"'.
+local PRIMARY_PASTE_ANYWHERE_APPS = { ["com.mitchellh.ghostty"] = true }
+-- Apps donde nunca se captura: en Finder, arrastrar selecciona ficheros, no texto.
+local PRIMARY_IGNORE_APPS = { ["com.apple.finder"] = true }
+
+local primaryText = nil
+local primaryDownAt = nil
+local primarySwallowUp = false
+local primaryCapturing = false
+local P = hs.eventtap.event.properties
+local MT = hs.eventtap.event.types
+
+local function axFocused()
+    local ok, el = pcall(function()
+        return hs.axuielement.systemWideElement():attributeValue("AXFocusedUIElement")
+    end)
+    return ok and el or nil
+end
+
+local function capturePrimary()
+    if primaryCapturing then return end
+    local app = hs.application.frontmostApplication()
+    local el = axFocused()
+    local role = el and el:attributeValue("AXRole")
+    local bundle = app and app:bundleID()
+    if PRIMARY_IGNORE_APPS[bundle] then return end
+    -- Sin rol es que la app no expone accesibilidad (Chrome, Electron): se intenta igualmente.
+    -- Con rol, solo si es algo que contiene texto.
+    if role and not (PRIMARY_CAPTURE_ROLES[role] or PRIMARY_PASTE_ANYWHERE_APPS[bundle]) then return end
+
+    local selected = el and el:attributeValue("AXSelectedText")
+    if type(selected) == "string" and #selected > 0 then
+        primaryText = selected
+        return
+    end
+
+    -- La app no expone la seleccion: se copia y se restaura el portapapeles.
+    primaryCapturing = true
+    local saved = hs.pasteboard.readAllData()
+    local before = hs.pasteboard.changeCount()
+    hs.eventtap.keyStroke({ "cmd" }, "c", 0, app)
+    hs.timer.doAfter(0.15, function()
+        if hs.pasteboard.changeCount() ~= before then
+            local text = hs.pasteboard.readString()
+            if text and #text > 0 then primaryText = text end
+            if saved then hs.pasteboard.writeAllData(saved) end
+        end
+        primaryCapturing = false
+    end)
+end
+
+local function editableUnder(pos)
+    local ok, el = pcall(function() return hs.axuielement.systemElementAtPosition(pos) end)
+    if not ok or not el then return false, nil end
+    local pid = el:pid()
+    local app = pid and hs.application.applicationForPID(pid)
+    if app and PRIMARY_PASTE_ANYWHERE_APPS[app:bundleID()] then return true, app end
+    local role = el:attributeValue("AXRole")
+    if PRIMARY_EDITABLE_ROLES[role] or el:attributeValue("AXEditableAncestor") then return true, app end
+    return false, app
+end
+
+primaryTap = hs.eventtap.new({ MT.leftMouseDown, MT.leftMouseUp, MT.otherMouseDown, MT.otherMouseUp }, function(event)
+    if not PRIMARY_ENABLED or spaceMoveBusy then return false end
+    local t = event:getType()
+
+    if t == MT.leftMouseDown then
+        primaryDownAt = event:location()
+        return false
+    end
+    if t == MT.leftMouseUp then
+        local pos = event:location()
+        local clicks = event:getProperty(P.mouseEventClickState) or 1
+        local moved = primaryDownAt and (math.abs(pos.x - primaryDownAt.x) + math.abs(pos.y - primaryDownAt.y) > 4)
+        if moved or clicks >= 2 or event:getFlags().shift then
+            hs.timer.doAfter(0.08, capturePrimary)
+        end
+        return false
+    end
+
+    if event:getProperty(P.mouseEventButtonNumber) ~= 2 then return false end
+    if t == MT.otherMouseUp then
+        if primarySwallowUp then primarySwallowUp = false; return true end
+        return false
+    end
+
+    -- boton central pulsado
+    if not primaryText then return false end
+    local pos = hs.mouse.absolutePosition()
+    local editable, app = editableUnder(pos)
+    if not editable then return false end
+    primarySwallowUp = true
+    local text = primaryText
+    hs.timer.doAfter(0, function()
+        hs.eventtap.leftClick(pos)
+        hs.timer.doAfter(0.06, function()
+            pastePreservingClipboard(text, app or hs.application.frontmostApplication())
+        end)
+    end)
+    return true
+end)
+
+primaryTap:start()
+
 dockScroll = {
     switch = pressSpaceShortcut,
     hint = showSwitchHint,
@@ -609,6 +742,7 @@ dockScroll = {
     moveScreen = moveWindowToScreen,
     overDock = mouseOverDock,
     zone = dockZone,
+    primary = function() return primaryText end,
 }
 
 -- spaceswitch es imprescindible: mueve ventanas entre escritorios y es el respaldo si falta

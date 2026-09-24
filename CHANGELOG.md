@@ -88,6 +88,22 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-09-24, Linux primary selection, and keys named for Mac and Windows keyboards
+
+- **Select to copy, middle-click to paste**, from a second clipboard that Ctrl+C / Ctrl+V never
+  touch. Captured through Accessibility, or by copy-and-restore where an app exposes nothing.
+  Middle-click pastes only over something editable (or in Ghostty), so links and tabs keep their
+  middle-click behaviour. Verified in TextEdit (double-click, drag, paste, clipboard untouched)
+  and Chrome (capture). Pasting into Chrome and Electron apps is off by default: they expose no
+  way to tell a text field from a link.
+- `pastePlain` and the new paste share one clipboard-preserving helper.
+- **Naming fixed**: the monitor shortcut uses Option, which on a Windows keyboard in Mac mode is
+  the Windows key, not Alt. The card labelled it "Alt". Docs now say Ctrl+Option.
+- **Shortcut card**: every Cmd and Option key carries both names (Cmd/Alt, Option/Win), like a
+  dual-legend keycap, and a **Mac keyboard / Windows keyboard** switch picks which name leads,
+  including on the keyboard drawing. Remembered per browser, linkable with `#windows`. Print keeps
+  both names, so one printout serves both; checked at one A4 page in each mode.
+
 ## 2026-09-24, the shortcut card redesigned
 
 The card is the repository's public face, so it was rebuilt rather than patched:

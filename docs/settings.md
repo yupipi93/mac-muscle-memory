@@ -48,7 +48,7 @@ Provides:
 - **Ctrl+Cmd+Shift+Left / Right** (Ctrl+Shift+Left / Right until 2026-09-24) move the focused
   window to the adjacent desktop and
   follow it.
-- **Ctrl+Alt+Left / Ctrl+Alt+Right** move the focused window to the adjacent monitor.
+- **Ctrl+Option+Left / Ctrl+Option+Right** move the focused window to the adjacent monitor.
 
 Tunables at the top of the file:
 
@@ -115,7 +115,8 @@ keyboard and `defaults` knows nothing about it, so record every remap in `person
 
 ## Moving a window between monitors
 
-**Ctrl+Alt+Left / Ctrl+Alt+Right.** Nothing to do with Spaces: this is plain geometry, so
+**Ctrl+Option+Left / Ctrl+Option+Right.** On a Windows keyboard in Mac mode, Option is the
+Windows key, not Alt; Hammerspoon calls the modifier `alt`. Nothing to do with Spaces: this is plain geometry, so
 `hs.window:moveToScreen` works and none of the broken APIs apply. It is the one thing on this
 machine that needed no workaround.
 
@@ -350,6 +351,47 @@ Still bound to Ctrl+Arrow by the system: **Ctrl+Up** (Mission Control) and **Ctr
 Possible conflict: some apps use Ctrl+Cmd+Left / Right themselves, for example VS Code family
 editors for moving an editor between groups. The system shortcut wins, so those app bindings no
 longer fire.
+
+## Select to copy, middle-click to paste
+
+The X11 primary selection that Ubuntu users rely on, added 2026-09-24. Selecting text copies it
+to a **second clipboard**; the middle mouse button pastes it. Ctrl+C / Ctrl+V and the normal
+clipboard are never affected.
+
+**Capture.** After a drag, a double or triple click, or a Shift+click, `init.lua` reads the
+selection:
+
+1. Through Accessibility (`AXSelectedText` of the focused element), which touches nothing.
+2. If the app does not expose it (Chrome and Electron apps report no focused element at all,
+   terminals expose no selection), it sends Cmd+C and restores the clipboard straight after,
+   every type, from `hs.pasteboard.readAllData()`.
+
+It only tries when the focused element holds text, or when the app exposes no accessibility at
+all. Finder is excluded outright: dragging there selects files.
+
+**Paste.** Only where there is something editable under the pointer, as Ubuntu does: a text
+field, a text area, a web editor with an editable ancestor, or an app in
+`PRIMARY_PASTE_ANYWHERE_APPS` (Ghostty by default). The caret is first moved to the pointer with
+a click, then the text is pasted with the same clipboard-preserving swap as Ctrl+Shift+V.
+Anywhere else the middle click passes through untouched: opening a link in a new tab or closing
+a tab keep working.
+
+**Limitation, measured.** Chrome and Electron apps such as Cursor expose nothing under the
+pointer (only a generic scroll area, even with `AXManualAccessibility` set), so there is no way
+to tell a text field from a link or a tab. Selecting in them **does** capture; middle-click
+pasting into them is **off** by default so links and tabs keep their middle-click behaviour. Add
+an app's bundle id to `PRIMARY_PASTE_ANYWHERE_APPS` to paste there regardless.
+
+Verified:
+
+| Where | Action | Result |
+|-------|--------|--------|
+| TextEdit, `alfa beta gamma`, clipboard holding `NORMAL` | double-click `beta` | second clipboard `beta`, clipboard still `NORMAL` |
+| same | drag across `gamma` | second clipboard `gamma`, clipboard still `NORMAL` |
+| same | middle-click after the text | document `alfa beta gammabeta`, clipboard still `NORMAL` |
+| Chrome, a web page | double-click a word | captured through the copy-and-restore path, clipboard restored |
+
+`PRIMARY_ENABLED = false` in `init.lua` turns it off.
 
 ## Next window of the same app: Option+Tab
 

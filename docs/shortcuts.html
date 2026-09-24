@@ -137,7 +137,7 @@
   .stats b { font: 700 20px/1.1 var(--display); font-variant-numeric: tabular-nums; }
   .stats b s { color: var(--ink-faint); font-weight: 500; font-size: 14px; margin-right: 6px; text-decoration-thickness: 1.5px; }
   .stats span { font-size: 12px; color: var(--ink-soft); }
-  .filter { position: relative; flex: 1 1 240px; max-width: 340px; }
+  .filter { position: relative; flex: 1 1 220px; max-width: 300px; }
   .filter input {
     width: 100%;
     font: 500 14px/1.2 var(--body);
@@ -264,6 +264,32 @@
     @keyframes press { 0%, 70%, 100% { transform: translateY(0); } 76% { transform: translateY(3px); } 84% { transform: translateY(0); } }
   }
 
+
+  /* dual-legend keys: Mac and Windows names on one cap */
+  kbd.dual { gap: 0; }
+  kbd.dual .lm, kbd.dual .lw { display: inline-flex; align-items: baseline; gap: 4px; }
+  kbd.dual .lw { font-size: 0.8em; color: var(--cap-glyph); margin-left: 6px; padding-left: 6px; border-left: 1px solid var(--cap-edge); }
+  body.kb-win kbd.dual .lw { order: -1; font-size: 1em; color: var(--cap-ink); margin: 0; padding: 0; border: 0; }
+  body.kb-win kbd.dual .lm { font-size: 0.8em; color: var(--cap-glyph); margin-left: 6px; padding-left: 6px; border-left: 1px solid var(--cap-edge); }
+  body.kb-win kbd.dual .lw .g { color: var(--cap-glyph); }
+  .k-win { display: none; }
+  body.kb-win .k-win { display: inline; }
+  body.kb-win .k-mac { display: none; }
+  .cap-sub { font: 500 9px var(--mono); fill: var(--cap-glyph); }
+  .tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; flex: 1 1 360px; justify-content: flex-end; }
+  .kbswitch { display: inline-flex; gap: 2px; padding: 3px; background: var(--paper); border: 1px solid var(--rule); border-radius: 10px; }
+  .kbswitch button { display: inline-flex; align-items: center; gap: 6px; font: 600 13px/1 var(--body); color: var(--ink-soft); background: transparent; border: 0; border-radius: 7px; padding: 8px 12px; cursor: pointer; }
+  .kbswitch button span { color: var(--ink-faint); font-family: var(--mono); }
+  .kbswitch button[aria-pressed="true"] { background: var(--sheet); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14); }
+  .kbswitch button[aria-pressed="true"] span { color: var(--accent-ink); }
+  .kbswitch button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .kbnote { margin: 8px 0 0; font-size: 12.5px; color: var(--ink-soft); }
+  .kbnote b { color: var(--ink); font-weight: 600; }
+  .print-mode { display: none; }
+  .pm-win { display: none; }
+  body.kb-win .pm-win { display: inline; }
+  body.kb-win .pm-mac { display: none; }
+
   /* ---------- print: one A4 page ---------- */
   @page { size: A4 portrait; margin: 9mm 9mm; }
   @media print {
@@ -281,7 +307,9 @@
     .eyebrow { font-size: 9px; margin-bottom: 4px; }
     h1 { font-size: 25px; }
     .lede { font-size: 10.4px; margin-top: 5px; max-width: none; }
-    .bar .filter, .bar .stats, .screen-only { display: none; }
+    .bar .filter, .bar .stats, .kbswitch, .screen-only { display: none; }
+    .print-mode { display: inline; }
+    .kbnote { font-size: 9.2px; margin-top: 4px; }
     .bar { padding-block: 0; border: 0; }
     .legend { margin-top: 7px; font-size: 9.6px; }
     .groups { grid-template-columns: 1fr 1fr; gap: 11px 20px; padding-block: 10px 0; }
@@ -346,19 +374,21 @@
             <rect class="cap-body" x="70" y="96" width="78" height="66" rx="10"/>
             <rect class="cap-face" x="75" y="100" width="68" height="48" rx="7"/>
             <text class="cap-glyph" x="84" y="121">⌃</text>
-            <text class="cap-txt" x="84" y="140">control</text>
+            <text class="cap-txt k-mac" x="84" y="140">control</text><text class="cap-txt k-win" x="84" y="140">ctrl</text>
           </g>
           <g class="dim">
             <rect class="cap-body" x="156" y="96" width="70" height="66" rx="10"/>
             <rect class="cap-face" x="161" y="100" width="60" height="48" rx="7"/>
-            <text class="cap-glyph" x="170" y="121">⌥</text>
-            <text class="cap-txt" x="170" y="140">option</text>
+            <text class="cap-glyph k-mac" x="170" y="121">⌥</text>
+            <text class="cap-txt k-mac" x="170" y="140">option</text><text class="cap-txt k-win" x="170" y="140">win</text>
+            <text class="cap-sub k-mac" x="212" y="116" text-anchor="end">win</text><text class="cap-sub k-win" x="212" y="116" text-anchor="end">option</text>
           </g>
           <g class="dim">
             <rect class="cap-body" x="234" y="96" width="86" height="66" rx="10"/>
             <rect class="cap-face" x="239" y="100" width="76" height="48" rx="7"/>
-            <text class="cap-glyph" x="248" y="121">⌘</text>
-            <text class="cap-txt" x="248" y="140">command</text>
+            <text class="cap-glyph k-mac" x="248" y="121">⌘</text>
+            <text class="cap-txt k-mac" x="248" y="140">command</text><text class="cap-txt k-win" x="248" y="140">alt</text>
+            <text class="cap-sub k-mac" x="306" y="116" text-anchor="end">alt</text><text class="cap-sub k-win" x="306" y="116" text-anchor="end">command</text>
           </g>
           <g class="dim">
             <rect class="cap-body" x="328" y="96" width="120" height="66" rx="10"/>
@@ -374,10 +404,16 @@
         <li><b><s>980 ms</s>0.4 s</b><span>take a window along</span></li>
         <li><b>30+</b><span>shortcuts, one file</span></li>
       </ul>
+      <div class="tools">
+      <div class="kbswitch" role="group" aria-label="Keyboard">
+        <button type="button" id="kb-mac" data-kb="mac" aria-pressed="true"><span aria-hidden="true">⌘</span>Mac keyboard</button>
+        <button type="button" id="kb-win" data-kb="win" aria-pressed="false"><span aria-hidden="true">⊞</span>Windows keyboard</button>
+      </div>
       <label class="filter" for="filter">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
         <input id="filter" type="search" placeholder="Filter: tab, bold, desktop, trash" autocomplete="off" aria-label="Filter shortcuts">
       </label>
+      </div>
     </div>
 
     <div class="legend">
@@ -386,6 +422,7 @@
       <span><span class="tag mouse">mouse</span> not a key combination</span>
       <span><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd> the key doing Windows and Linux jobs</span>
     </div>
+    <p class="kbnote">Keys carry both names. On a Windows keyboard in Mac mode, <b>Cmd</b> is the <b>Alt</b> key and <b>Option</b> is the <b>Windows</b> key.<span class="print-mode"> Printed with <span class="pm-mac">Mac</span><span class="pm-win">Windows</span> names first.</span></p>
 
     <div class="groups" id="groups">
       <section class="group" aria-labelledby="g-desk">
@@ -394,19 +431,19 @@
           <h2 id="g-desk">Desktops, windows, monitors</h2><span class="count">5</span>
         </div>
         <div class="row" data-k="space mission switch next previous">
-          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⌘</span>Cmd</kbd><i class="p">+</i><kbd>←</kbd><i class="o">/</i><kbd>→</kbd></div>
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd class="dual"><span class="lm"><span class="g">⌘</span>Cmd</span><span class="lw">Alt</span></kbd><i class="p">+</i><kbd>←</kbd><i class="o">/</i><kbd>→</kbd></div>
           <div class="what">Previous / next desktop<span class="tag">native</span><span class="note">Moved off Ctrl+Arrow to free it for text.</span></div>
         </div>
         <div class="row" data-k="move window space follow">
-          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⌘</span>Cmd</kbd><i class="p">+</i><kbd><span class="g">⇧</span>Shift</kbd><i class="p">+</i><kbd>←</kbd><i class="o">/</i><kbd>→</kbd></div>
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd class="dual"><span class="lm"><span class="g">⌘</span>Cmd</span><span class="lw">Alt</span></kbd><i class="p">+</i><kbd><span class="g">⇧</span>Shift</kbd><i class="p">+</i><kbd>←</kbd><i class="o">/</i><kbd>→</kbd></div>
           <div class="what">Take the window to the next desktop<span class="note">You follow it. About 0.4 s.</span></div>
         </div>
         <div class="row" data-k="monitor screen display move">
-          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⌥</span>Alt</kbd><i class="p">+</i><kbd>←</kbd><i class="o">/</i><kbd>→</kbd></div>
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd class="dual"><span class="lm"><span class="g">⌥</span>Opt</span><span class="lw"><span class="g">⊞</span>Win</span></kbd><i class="p">+</i><kbd>←</kbd><i class="o">/</i><kbd>→</kbd></div>
           <div class="what">Window to the monitor on that side<span class="note">Same desktop, rescaled to fit.</span></div>
         </div>
         <div class="row" data-k="cycle windows same app alt tab option">
-          <div class="keys"><kbd><span class="g">⌥</span>Alt</kbd><i class="p">+</i><kbd>Tab</kbd><span class="word">, add</span><kbd><span class="g">⇧</span>Shift</kbd></div>
+          <div class="keys"><kbd class="dual"><span class="lm"><span class="g">⌥</span>Opt</span><span class="lw"><span class="g">⊞</span>Win</span></kbd><i class="p">+</i><kbd>Tab</kbd><span class="word">, add</span><kbd><span class="g">⇧</span>Shift</kbd></div>
           <div class="what">Next / previous window of the same app<span class="tag">native</span><span class="note">Moved off Cmd+`, like Alt+` on GNOME.</span></div>
         </div>
         <div class="row" data-k="scroll wheel dock ubuntu">
@@ -418,7 +455,7 @@
       <section class="group" aria-labelledby="g-text">
         <div class="group-head">
           <span class="badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 19 8 6h1.2L13.7 19M5.3 14.5h6.2"/><path d="M18 5v14M16 5h4M16 19h4"/></svg></span>
-          <h2 id="g-text">Text, in every app</h2><span class="count">7</span>
+          <h2 id="g-text">Text, in every app</h2><span class="count">8</span>
         </div>
         <div class="row" data-k="copy cut paste clipboard">
           <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd>C</kbd><kbd>X</kbd><kbd>V</kbd></div>
@@ -448,6 +485,10 @@
           <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⇧</span>Shift</kbd><i class="p">+</i><kbd>←</kbd><i class="o">/</i><kbd>→</kbd></div>
           <div class="what">Extend the selection one word</div>
         </div>
+        <div class="row" data-k="primary selection middle click paste linux mouse wheel">
+          <div class="keys"><span class="tag mouse">mouse</span><span class="word">select, then middle-click</span></div>
+          <div class="what">Paste the last selection, Linux style<span class="note">A second clipboard: Ctrl+C and Ctrl+V stay untouched.</span></div>
+        </div>
       </section>
 
       <section class="group" aria-labelledby="g-shot">
@@ -460,11 +501,11 @@
           <div class="what">Crop an area: saved <em>and</em> copied<span class="note">Drag to select, Esc to cancel. Shutter sound. Lands in ~/Pictures/Screenshots.</span></div>
         </div>
         <div class="row" data-k="screenshot toolbar record video">
-          <div class="keys"><kbd><span class="g">⌘</span>Cmd</kbd><i class="p">+</i><kbd><span class="g">⇧</span>Shift</kbd><i class="p">+</i><kbd>5</kbd></div>
+          <div class="keys"><kbd class="dual"><span class="lm"><span class="g">⌘</span>Cmd</span><span class="lw">Alt</span></kbd><i class="p">+</i><kbd><span class="g">⇧</span>Shift</kbd><i class="p">+</i><kbd>5</kbd></div>
           <div class="what">Screenshot and recording toolbar<span class="tag">native</span></div>
         </div>
         <div class="row" data-k="screenshot crop clipboard only">
-          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⌘</span>Cmd</kbd><i class="p">+</i><kbd><span class="g">⇧</span>Shift</kbd><i class="p">+</i><kbd>4</kbd></div>
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd class="dual"><span class="lm"><span class="g">⌘</span>Cmd</span><span class="lw">Alt</span></kbd><i class="p">+</i><kbd><span class="g">⇧</span>Shift</kbd><i class="p">+</i><kbd>4</kbd></div>
           <div class="what">Crop to the clipboard only<span class="tag">native</span></div>
         </div>
       </section>
@@ -490,7 +531,7 @@
           <h2 id="g-term">Ghostty terminal</h2><span class="count">4</span>
         </div>
         <div class="row" data-k="terminal new window ghostty">
-          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⌘</span>Cmd</kbd><i class="p">+</i><kbd>T</kbd></div>
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd class="dual"><span class="lm"><span class="g">⌘</span>Cmd</span><span class="lw">Alt</span></kbd><i class="p">+</i><kbd>T</kbd></div>
           <div class="what">New terminal window, from any app<span class="note">Like Ctrl+Alt+T on Ubuntu.</span></div>
         </div>
         <div class="row" data-k="terminal tab new close terminator">
@@ -502,7 +543,7 @@
           <div class="what">Next / previous tab<span class="tag">built-in</span></div>
         </div>
         <div class="row" data-k="quick terminal dropdown guake">
-          <div class="keys"><kbd><span class="g">⌘</span>Cmd</kbd><i class="p">+</i><kbd>`</kbd></div>
+          <div class="keys"><kbd class="dual"><span class="lm"><span class="g">⌘</span>Cmd</span><span class="lw">Alt</span></kbd><i class="p">+</i><kbd>`</kbd></div>
           <div class="what">Drop-down Quick Terminal<span class="note">Like Guake, from any app.</span></div>
         </div>
       </section>
@@ -513,11 +554,11 @@
           <h2 id="g-session">Session</h2><span class="count">3</span>
         </div>
         <div class="row" data-k="lock session screen win+l">
-          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⌘</span>Cmd</kbd><i class="p">+</i><kbd>L</kbd></div>
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd class="dual"><span class="lm"><span class="g">⌘</span>Cmd</span><span class="lw">Alt</span></kbd><i class="p">+</i><kbd>L</kbd></div>
           <div class="what">Lock the session, like Win+L<span class="note">Password asked at once. Apps stay open.</span></div>
         </div>
         <div class="row" data-k="lock session screen">
-          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd><span class="g">⌘</span>Cmd</kbd><i class="p">+</i><kbd>Q</kbd></div>
+          <div class="keys"><kbd class="ctrl"><span class="g">⌃</span>Ctrl</kbd><i class="p">+</i><kbd class="dual"><span class="lm"><span class="g">⌘</span>Cmd</span><span class="lw">Alt</span></kbd><i class="p">+</i><kbd>Q</kbd></div>
           <div class="what">Lock the session<span class="tag">native</span></div>
         </div>
         <div class="row" data-k="mission control expose windows">
@@ -532,8 +573,8 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 21.5 20h-19Z"/><path d="M12 10v4.5M12 17.2v.1"/></svg>
       <h2 id="t-head">What Ctrl no longer does</h2>
       <ul>
-        <li><strong>In terminals</strong> Ctrl+C copies instead of interrupting, so stop a command with <kbd>⌃ Ctrl</kbd>+<kbd>\</kbd>. Ctrl+Z undoes instead of suspending, Ctrl+B no longer reaches tmux, and Ctrl+A selects all instead of jumping to the line start: use <kbd>⌘ Cmd</kbd>+<kbd>←</kbd>.</li>
-        <li><strong>Cmd+Shift+3</strong> opens the crop tool too, because that is what the Print Screen key sends. Full screen to the clipboard is still <kbd>⌃ Ctrl</kbd>+<kbd>⌘ Cmd</kbd>+<kbd>⇧ Shift</kbd>+<kbd>3</kbd>.</li>
+        <li><strong>In terminals</strong> Ctrl+C copies instead of interrupting, so stop a command with <kbd>⌃ Ctrl</kbd>+<kbd>\</kbd>. Ctrl+Z undoes instead of suspending, Ctrl+B no longer reaches tmux, and Ctrl+A selects all instead of jumping to the line start: use <kbd class="dual"><span class="lm"><span class="g">⌘</span>Cmd</span><span class="lw">Alt</span></kbd>+<kbd>←</kbd>.</li>
+        <li><strong>Cmd+Shift+3</strong> opens the crop tool too, because that is what the Print Screen key sends. Full screen to the clipboard is still <kbd>⌃ Ctrl</kbd>+<kbd class="dual"><span class="lm"><span class="g">⌘</span>Cmd</span><span class="lw">Alt</span></kbd>+<kbd>⇧ Shift</kbd>+<kbd>3</kbd>.</li>
         <li><strong>Ctrl+Cmd+←/→</strong> belongs to the system now, so apps that used it (moving an editor between groups in Cursor, for example) no longer get it.</li>
       </ul>
     </aside>
@@ -546,6 +587,25 @@
   </div>
 </main>
 <script>
+  (function () {
+    var KEY = "mac-muscle-memory.keyboard";
+    function setKb(mode, save) {
+      document.body.classList.toggle("kb-win", mode === "win");
+      ["mac", "win"].forEach(function (m) {
+        var btn = document.getElementById("kb-" + m);
+        if (btn) btn.setAttribute("aria-pressed", String(m === mode));
+      });
+      if (save) { try { localStorage.setItem(KEY, mode); } catch (e) {} }
+    }
+    var initial = "mac";
+    try { initial = localStorage.getItem(KEY) || initial; } catch (e) {}
+    if (location.hash === "#windows") initial = "win";
+    if (location.hash === "#mac") initial = "mac";
+    setKb(initial, false);
+    document.querySelectorAll(".kbswitch button").forEach(function (btn) {
+      btn.addEventListener("click", function () { setKb(btn.getAttribute("data-kb"), true); });
+    });
+  })();
   (function () {
     var input = document.getElementById("filter");
     var empty = document.getElementById("empty");
