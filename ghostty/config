@@ -1,0 +1,21 @@
+# Ghostty terminal, configured so Linux terminal habits carry over.
+# Symlinked to ~/.config/ghostty/config by bin/apply.sh. See docs/tools.md.
+
+# Font: a Nerd Font, so prompt glyphs and icons render.
+font-family = MesloLGS Nerd Font Mono
+font-size = 13
+
+# Linux-terminal style shortcuts, as in Terminator and GNOME Terminal (Ctrl+Shift).
+# Ctrl+Tab / Ctrl+Shift+Tab to switch tabs are Ghostty defaults.
+keybind = ctrl+shift+t=new_tab
+keybind = ctrl+shift+w=close_surface
+keybind = ctrl+shift+a=new_split:auto
+keybind = ctrl+plus=increase_font_size:1
+keybind = ctrl+minus=decrease_font_size:1
+keybind = ctrl+zero=reset_font_size
+
+# Quick Terminal: Cmd+` shows and hides a drop-down terminal from any app,
+# like Guake or Yakuake on Linux.
+keybind = global:cmd+grave_accent=toggle_quick_terminal
+quick-terminal-position = top
+quick-terminal-autohide = true
