@@ -88,6 +88,16 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-09-24, move to another monitor with Win+Shift+Arrow
+
+- Moving the window to the adjacent monitor is now **Option+Shift+Left / Right** (Win+Shift on a
+  Windows keyboard), exactly Ubuntu's Super+Shift+Arrow, instead of Ctrl+Option+Arrow.
+- Ctrl+Shift+Arrow was asked for first, but it already selects by word; the owner chose the
+  Ubuntu combination instead.
+- Lives in the source-aware tap with window placement, so the Option+Shift+Arrow that
+  Ctrl+Shift+Arrow posts still selects a word. Verified with real presses: the window went to
+  the built-in display and back, and Ctrl+Shift+Left selected `tres`.
+
 ## 2026-09-24, place windows with the Windows key, Ubuntu style
 
 - **Option+Left / Right** put the focused window on the left or right half of its screen,

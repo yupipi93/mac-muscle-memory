@@ -22,7 +22,7 @@ repo file and reloading Hammerspoon is the whole workflow.
 What it provides, each explained in `settings.md`:
 
 - Scroll over the Dock to change desktop.
-- Ctrl+Cmd+Shift+Arrow to take a window to the next desktop, Ctrl+Option+Arrow to the next monitor.
+- Ctrl+Cmd+Shift+Arrow to take a window to the next desktop, Option+Shift+Arrow (Win+Shift) to the next monitor.
 - Ctrl+C / X / V / Z / A, Ctrl+Shift+V, Ctrl+Arrow and Ctrl+Shift+Arrow in every app.
 - Print Screen crops, saves and copies. Delete and Shift+Delete in Finder.
 - Select text and middle-click to paste it, from a second clipboard, as on Linux.

@@ -48,7 +48,7 @@ Provides:
 - **Ctrl+Cmd+Shift+Left / Right** (Ctrl+Shift+Left / Right until 2026-09-24) move the focused
   window to the adjacent desktop and
   follow it.
-- **Ctrl+Option+Left / Ctrl+Option+Right** move the focused window to the adjacent monitor.
+- **Option+Shift+Left / Right** (Win+Shift on a Windows keyboard) move the focused window to the adjacent monitor.
 
 Tunables at the top of the file:
 
@@ -115,7 +115,10 @@ keyboard and `defaults` knows nothing about it, so record every remap in `person
 
 ## Moving a window between monitors
 
-**Ctrl+Option+Left / Ctrl+Option+Right.** On a Windows keyboard in Mac mode, Option is the
+**Option+Shift+Left / Option+Shift+Right**, like Super+Shift+Arrow on Ubuntu (Ctrl+Option+Arrow
+until 2026-09-24). Handled by the same source-aware event tap as window placement, so the
+Option+Shift+Arrow that Ctrl+Shift+Arrow posts to select a word still reaches the app. On a
+Windows keyboard in Mac mode, Option is the
 Windows key, not Alt; Hammerspoon calls the modifier `alt`. Nothing to do with Spaces: this is plain geometry, so
 `hs.window:moveToScreen` works and none of the broken APIs apply. It is the one thing on this
 machine that needed no workaround.

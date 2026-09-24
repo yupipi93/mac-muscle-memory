@@ -245,7 +245,7 @@ hs.hotkey.bind({"ctrl", "cmd", "shift"}, "left", function() moveFocusedWindowToS
 hs.hotkey.bind({"ctrl", "cmd", "shift"}, "right", function() moveFocusedWindowToSpace(1) end)
 
 -- Mover la ventana enfocada al monitor de al lado.
--- Ctrl+Option+Left / Ctrl+Option+Right ("alt" en Hammerspoon es la tecla Option; en un teclado
+-- Option+Shift+Left / Option+Shift+Right ("alt" en Hammerspoon es la tecla Option; en un teclado
 -- Windows en modo Mac es la tecla Windows, no la Alt).
 --
 -- Esto no tiene nada que ver con los escritorios: cambiar de monitor es mover un marco por
@@ -269,8 +269,8 @@ local function moveWindowToScreen(direction)
     win:moveToScreen(target, false, true, 0)
 end
 
-hs.hotkey.bind({"ctrl", "alt"}, "left", function() moveWindowToScreen(-1) end)
-hs.hotkey.bind({"ctrl", "alt"}, "right", function() moveWindowToScreen(1) end)
+-- Atajo: Option+Shift+Izquierda / Derecha (Win+Shift en un teclado Windows), como Super+Shift en
+-- Ubuntu. Lo gestiona tileTap mas abajo. Era Ctrl+Option+flecha hasta el 2026-09-24.
 
 -- Colocar la ventana como en Ubuntu con la tecla Windows, que en macOS es Option (2026-09-24):
 --   Option+Izquierda / Derecha  -> mitad izquierda / derecha de su pantalla
@@ -318,8 +318,14 @@ tileTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
     local where = TILE_KEYS[event:getKeyCode()]
     if not where then return false end
     local f = event:getFlags()
-    if not f.alt or f.cmd or f.ctrl or f.shift then return false end
+    if not f.alt or f.cmd or f.ctrl then return false end
     if event:getProperty(hs.eventtap.event.properties.eventSourceUnixProcessID) == OWN_PID then return false end
+    if f.shift then
+        -- Option+Shift+Izquierda / Derecha: la ventana al monitor de ese lado.
+        if where == "left" then moveWindowToScreen(-1); return true end
+        if where == "right" then moveWindowToScreen(1); return true end
+        return false
+    end
     tileWindow(where)
     return true
 end)

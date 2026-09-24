@@ -43,7 +43,7 @@ the way so nobody has to rediscover it.
 | Mouse wheel over the Dock | previous / next desktop, like the Ubuntu dock | nothing |
 | <kbd>Ctrl</kbd> <kbd>Cmd</kbd> <kbd>←</kbd> <kbd>→</kbd> | switch desktop, about 0.13 s | Ctrl+Arrow, about 1.2 s |
 | <kbd>Ctrl</kbd> <kbd>Cmd</kbd> <kbd>Shift</kbd> <kbd>←</kbd> <kbd>→</kbd> | take the window to the next desktop | drag it to the screen edge and wait |
-| <kbd>Ctrl</kbd> <kbd>Option</kbd> <kbd>←</kbd> <kbd>→</kbd> | move the window to the next monitor | drag it across |
+| <kbd>Option</kbd> <kbd>Shift</kbd> <kbd>←</kbd> <kbd>→</kbd> | move the window to the next monitor, like Super+Shift+Arrow on Ubuntu | drag it across |
 | <kbd>Option</kbd> <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> | window to the left or right half, maximize, back to its size, like Super+Arrow on Ubuntu | nothing built in |
 | <kbd>Option</kbd> <kbd>Tab</kbd>, add <kbd>Shift</kbd> to go back | next window of the same app, like Alt+` on GNOME | Cmd+` |
 | <kbd>Ctrl</kbd> <kbd>Cmd</kbd> <kbd>L</kbd> | lock the session, like Win+L | Ctrl+Cmd+Q |
