@@ -33,7 +33,7 @@ the way so nobody has to rediscover it.
 
 | Keys | Does | On a stock Mac |
 |------|------|----------------|
-| <kbd>Ctrl</kbd> <kbd>C</kbd> / <kbd>X</kbd> / <kbd>V</kbd> / <kbd>Z</kbd> / <kbd>A</kbd> | copy, cut, paste, undo, select all, in every app | Cmd instead of Ctrl |
+| <kbd>Ctrl</kbd> <kbd>C</kbd> / <kbd>X</kbd> / <kbd>V</kbd> / <kbd>Z</kbd> / <kbd>A</kbd> / <kbd>B</kbd> | copy, cut, paste, undo, select all, bold, in every app | Cmd instead of Ctrl |
 | <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>V</kbd> | paste without formatting, in every app | a different shortcut per app, or none |
 | <kbd>Ctrl</kbd> <kbd>←</kbd> <kbd>→</kbd>, add <kbd>Shift</kbd> to select | jump and select by word | Option+Arrow |
 | <kbd>Print Screen</kbd> | crop an area, save it **and** copy it | no such key |
@@ -143,6 +143,7 @@ Ctrl now means "Windows Ctrl" everywhere, terminals included, by choice:
 - **Ctrl+C copies instead of interrupting.** Stop a command with <kbd>Ctrl</kbd> <kbd>\\</kbd>.
 - **Ctrl+Z undoes instead of suspending**, and **Ctrl+A selects all** instead of jumping to the
   line start (use <kbd>Cmd</kbd> <kbd>←</kbd>).
+- **Ctrl+B is bold**, so it no longer reaches tmux, whose default prefix it is.
 - **Cmd+Shift+3** opens the crop tool too, because that is what the Print Screen key sends.
 
 Put an app in `CLIPBOARD_PASSTHROUGH_APPS` to give it its native behaviour back.

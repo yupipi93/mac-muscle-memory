@@ -154,6 +154,7 @@ Added 2026-09-23:
 |----------|------|-----|
 | **Ctrl+Z** | undo | Posted to the app as Cmd+Z, same mechanism as Ctrl+C. |
 | **Ctrl+A** | select all | Posted as Cmd+A. Verified in TextEdit: three typed lines, Ctrl+A then Cmd+C copied all three. |
+| **Ctrl+B** | bold | Posted as Cmd+B. Verified in TextEdit: selected text went from Helvetica to Helvetica-Bold. |
 | **Ctrl+Shift+V** | paste as plain text | See below. Matches Ctrl+Shift+V in Linux terminals. |
 
 **macOS has no universal plain-paste shortcut.** Chrome and native apps use Cmd+Alt+Shift+V,
@@ -182,7 +183,7 @@ Verified in TextEdit with `NEGRITA` in Helvetica-Bold 30 on the clipboard:
 | After Ctrl+Z | document empty, the paste was undone |
 
 **Cost in terminals, same trade-off as Ctrl+C:** Ctrl+Z no longer suspends the running process
-(SIGTSTP), it becomes undo. Ctrl+A no longer jumps to the start of the line, neither in the
+(SIGTSTP), it becomes undo. Ctrl+B is bold, so it no longer reaches tmux (its default prefix) or readline. Ctrl+A no longer jumps to the start of the line, neither in the
 shell (readline) nor in macOS text fields, which also bind it that way; Cmd+Left or Home does
 that now. The `CLIPBOARD_PASSTHROUGH_APPS` list restores it per app.
 

@@ -302,6 +302,8 @@ end)
 -- de otra forma (cerrar la pestana, o cambiar el caracter de interrupcion con `stty intr`).
 -- Lo mismo con Ctrl+Z: en un terminal ya NO suspende el proceso (SIGTSTP), se convierte en
 -- deshacer. Ctrl+Shift+V en cambio coincide con el pegar de los terminales de Linux.
+-- Ctrl+B tampoco llega al terminal: deja de ser el prefijo de tmux y el "atras un caracter"
+-- de readline.
 -- Y Ctrl+A ya no lleva al principio de la linea, ni en el terminal (readline) ni en los campos
 -- de texto de macOS, que tambien lo usaban asi. Para eso queda Cmd+Flecha izquierda o Inicio.
 --
@@ -319,6 +321,8 @@ local clipboardShortcuts = {
     [hs.keycodes.map.x] = { plain = "x" },
     [hs.keycodes.map.z] = { plain = "z" },
     [hs.keycodes.map.a] = { plain = "a" },
+    -- Ctrl+B pone en negrita el texto seleccionado, como en Windows y Ubuntu (2026-09-24).
+    [hs.keycodes.map.b] = { plain = "b" },
 
     -- Moverse y seleccionar por palabras con Ctrl, como en Ubuntu y Windows (2026-09-24). En
     -- macOS eso es Option: Ctrl+flecha -> Option+flecha, Ctrl+Shift+flecha -> Option+Shift+flecha.

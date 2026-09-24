@@ -279,6 +279,10 @@
         <div class="what">Select all</div>
       </div>
       <div class="row">
+        <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>B</kbd></div>
+        <div class="what">Bold the selected text</div>
+      </div>
+      <div class="row">
         <div class="keys"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>←</kbd><span class="plus">/</span><kbd>→</kbd></div>
         <div class="what">Jump one word</div>
       </div>
@@ -353,7 +357,7 @@
   <aside class="caveats" aria-labelledby="h-caveats">
     <h2 id="h-caveats">What these shortcuts took away</h2>
     <ul>
-      <li><strong>Terminals:</strong> Ctrl+C copies instead of interrupting, so stop a running command with <kbd>Ctrl</kbd>+<kbd>\</kbd>. Ctrl+Z undoes instead of suspending. Ctrl+A selects all instead of jumping to the line start, so use <kbd>⌘ Cmd</kbd>+<kbd>←</kbd> or Home.</li>
+      <li><strong>Terminals:</strong> Ctrl+C copies instead of interrupting, so stop a running command with <kbd>Ctrl</kbd>+<kbd>\</kbd>. Ctrl+Z undoes instead of suspending. Ctrl+B is bold, so it no longer reaches tmux or readline. Ctrl+A selects all instead of jumping to the line start, so use <kbd>⌘ Cmd</kbd>+<kbd>←</kbd> or Home.</li>
       <li><strong>Cmd+Shift+3</strong> now opens the crop tool too, because that is what the Print Screen key sends. A full-screen shot to the clipboard is still <kbd>Ctrl</kbd>+<kbd>⌘ Cmd</kbd>+<kbd>⇧ Shift</kbd>+<kbd>3</kbd>.</li>
       <li><strong>Ctrl+Cmd+←/→</strong> belongs to the system now, so apps that used it (moving an editor between groups in Cursor, for example) no longer get it.</li>
     </ul>

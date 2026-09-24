@@ -88,6 +88,13 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-09-24, Ctrl+B for bold
+
+- **Ctrl+B** bolds the selected text in every app, posted as Cmd+B. Verified in TextEdit:
+  Helvetica became Helvetica-Bold.
+- Cost: Ctrl+B no longer reaches terminals, where it is tmux's default prefix and readline's
+  "back one character". Listed on the shortcut card with the other terminal trade-offs.
+
 ## 2026-09-24, Ghostty tabs, and keyboard-specific material made private
 
 - Ghostty: **Ctrl+Shift+T** opens a new tab, alongside the existing Ctrl+Shift+W to close it,
