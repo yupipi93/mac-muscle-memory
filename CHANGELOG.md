@@ -88,6 +88,23 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-09-24, screenshots reach the clipboard again, Ghostty splits documented
+
+- **Bug fixed, introduced by the primary selection**: the Print Screen crop drag looked like a
+  text selection, so the copy-and-restore capture ran and put the previous clipboard back over
+  the screenshot. Capture now stands down while a screenshot is in progress and inside the
+  screenshot UI. Verified that capture is skipped during a real Print Screen session; the crop
+  itself cannot be driven by synthetic events, so the final check is by hand.
+- **Primary selection**: a cursor-shape probe (`helper/cursorkind`, built by `apply.sh`) as a
+  second signal for middle-click paste in apps that expose no Accessibility, and a short log of
+  every capture and middle click (`dockScroll.primaryLog()`), because a report of "it does not
+  work" needs to show where it stopped.
+- **Ghostty splits on the card and in `docs/tools.md`**: Ctrl+Shift+A (ours; Ghostty's own is
+  Cmd+D) opens a second terminal in the same tab, Ctrl+Shift+W closes the focused split, and
+  Cmd+Option+Arrow moves between splits (built-in). Documented that Ghostty's default
+  Ctrl+Cmd+Arrow split resize is now taken by desktop switching.
+- The card's groups now flow in two independent columns, which keeps it on one A4 page.
+
 ## 2026-09-24, Linux primary selection, and keys named for Mac and Windows keyboards
 
 - **Select to copy, middle-click to paste**, from a second clipboard that Ctrl+C / Ctrl+V never

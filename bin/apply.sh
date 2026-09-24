@@ -142,6 +142,20 @@ else
     fi
 fi
 
+# Cursor-shape probe for the middle-click paste in apps that expose no Accessibility.
+CK_SRC="$REPO/helper/cursorkind.m"
+CK_BIN="$REPO/helper/cursorkind"
+if [ -x "$CK_BIN" ] && [ "$CK_BIN" -nt "$CK_SRC" ]; then
+    ok "cursorkind already built"
+else
+    CK_SDK=""
+    for candidate in MacOSX26.5.sdk MacOSX26.sdk MacOSX15.sdk; do
+        [ -d "/Library/Developer/CommandLineTools/SDKs/$candidate" ] && { CK_SDK="/Library/Developer/CommandLineTools/SDKs/$candidate"; break; }
+    done
+    clang -O2 -Wall -fobjc-arc ${CK_SDK:+-isysroot "$CK_SDK"} -framework AppKit -o "$CK_BIN" "$CK_SRC" \
+        && ok "cursorkind built" || warn "cursorkind build failed; middle-click paste falls back to Accessibility only"
+fi
+
 # Symlink a config file from this repo into place, backing up whatever was there.
 link_config() {
     local source="$1" target="$2" label="$3"

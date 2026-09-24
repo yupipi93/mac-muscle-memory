@@ -74,10 +74,19 @@ The terminal. Its config, `ghostty/config`, is symlinked to `~/.config/ghostty/c
 | Ctrl+Shift+T | new tab | as in Terminator and GNOME Terminal |
 | Ctrl+Shift+W | close the current tab or split | as in Terminator |
 | Ctrl+Tab / Ctrl+Shift+Tab | next / previous tab | Ghostty default, same as Terminator's Ctrl+PageDown / PageUp role |
-| Ctrl+Shift+A | new split | |
+| Ctrl+Shift+A | **split**: a second terminal inside the same tab | **ours**, not a Ghostty default (its own is Cmd+D / Cmd+Shift+D); `new_split:auto` picks the direction from the pane's shape |
+| Cmd+Option+Arrow | move between splits | Ghostty default |
 | Ctrl+Plus / Minus / 0 | font size up, down, reset | same as browsers and Linux terminals |
 | Cmd+` | show or hide a drop-down terminal from any app | like Guake or Yakuake |
 | Ctrl+Cmd+T | new Ghostty window, from anywhere | Ubuntu's Ctrl+Alt+T; bound in Hammerspoon |
+
+Splits are the feature most worth knowing: Ctrl+Shift+A opens another terminal beside the
+current one inside the same tab, and Ctrl+Shift+W closes whichever split has focus (the tab goes
+when its last split does). Both bindings are in `ghostty/config`, not Ghostty defaults.
+
+One conflict to know about: Ghostty resizes splits with Ctrl+Cmd+Arrow by default, and that
+combination now switches desktops system-wide, so it no longer reaches Ghostty. Drag the divider
+instead, or bind `resize_split` to something else in `ghostty/config`.
 
 Font: MesloLGS Nerd Font Mono, 13 pt, so prompt themes that use Nerd Font glyphs render.
 

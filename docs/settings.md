@@ -376,6 +376,24 @@ a click, then the text is pasted with the same clipboard-preserving swap as Ctrl
 Anywhere else the middle click passes through untouched: opening a link in a new tab or closing
 a tab keep working.
 
+**Cursor shape, for apps that expose nothing.** When Accessibility cannot say what is under the
+pointer, `helper/cursorkind` asks macOS which cursor is showing: the text I-beam means paste, a
+pointing hand (a link) or the arrow (a tab) means let the middle click through. It is a second
+signal, only consulted when Accessibility has nothing, so it can only add paste targets.
+Synthetic pointer moves did not change the reported cursor in testing, so this path still needs
+confirming with a real mouse.
+
+**Screenshots.** The crop drag of the Print Screen key looks exactly like a text selection. The
+copy-and-restore capture used to fire on it and restore the old clipboard over the screenshot
+that had just been copied. Capture now stands down while a screenshot is in progress
+(`screenshotInProgress`), and never runs inside the screenshot UI.
+
+**Diagnosing.** A short log of every capture and middle click, with the decision and the reason:
+
+```bash
+hs -c 'return table.concat(dockScroll.primaryLog(), "\n")'
+```
+
 **Limitation, measured.** Chrome and Electron apps such as Cursor expose nothing under the
 pointer (only a generic scroll area, even with `AXManualAccessibility` set), so there is no way
 to tell a text field from a link or a tab. Selecting in them **does** capture; middle-click

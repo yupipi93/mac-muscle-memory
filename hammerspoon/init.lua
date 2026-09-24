@@ -484,6 +484,10 @@ finderDeleteTap:start()
 -- symbolichotkeys ya nos rompio cosas una vez: ver el aviso sobre `noswoosh setup` y los
 -- atajos 79 y 81 en docs/macos-27-notes.md.
 local SCREENSHOT_REMAP_ENABLED = true
+-- Mientras una captura esta en marcha, la seleccion primaria no debe tocar el portapapeles:
+-- el arrastre del recorte parece una seleccion de texto, y su "copiar y restaurar" machacaba
+-- la imagen recien copiada con el contenido anterior (2026-09-24).
+screenshotInProgress = false
 local SCREENSHOT_SOUND = true
 
 -- Se lee del mismo ajuste del sistema que escribe bin/apply.sh, en vez de repetir la ruta aqui:
@@ -539,8 +543,10 @@ screenshotTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(ev
     if not SCREENSHOT_SOUND then args[#args + 1] = "-x" end
     args[#args + 1] = path
 
+    screenshotInProgress = true
     runTask("/usr/sbin/screencapture", args, function()
         copyShotToPasteboard(path)
+        hs.timer.doAfter(1.0, function() screenshotInProgress = false end)
     end)
     return true
 end)
@@ -631,6 +637,14 @@ local PRIMARY_PASTE_ANYWHERE_APPS = { ["com.mitchellh.ghostty"] = true }
 local PRIMARY_IGNORE_APPS = { ["com.apple.finder"] = true }
 
 local primaryText = nil
+-- Registro corto de lo que ha hecho la seleccion primaria, para diagnosticar sin adivinar:
+--   hs -c 'return table.concat(dockScroll.primaryLog(), "\n")'
+local primaryLog = {}
+local function plog(msg)
+    primaryLog[#primaryLog + 1] = os.date("%H:%M:%S ") .. msg
+    if #primaryLog > 40 then table.remove(primaryLog, 1) end
+end
+local CURSORKIND = REPO .. "/helper/cursorkind"
 local primaryDownAt = nil
 local primarySwallowUp = false
 local primaryCapturing = false
@@ -646,18 +660,24 @@ end
 
 local function capturePrimary()
     if primaryCapturing then return end
+    if screenshotInProgress then plog("captura: omitida, hay una captura de pantalla en curso"); return end
     local app = hs.application.frontmostApplication()
+    if app and app:bundleID() == "com.apple.screencaptureui" then return end
     local el = axFocused()
     local role = el and el:attributeValue("AXRole")
     local bundle = app and app:bundleID()
-    if PRIMARY_IGNORE_APPS[bundle] then return end
+    if PRIMARY_IGNORE_APPS[bundle] then plog("captura: omitida en " .. tostring(bundle)); return end
     -- Sin rol es que la app no expone accesibilidad (Chrome, Electron): se intenta igualmente.
     -- Con rol, solo si es algo que contiene texto.
-    if role and not (PRIMARY_CAPTURE_ROLES[role] or PRIMARY_PASTE_ANYWHERE_APPS[bundle]) then return end
+    if role and not (PRIMARY_CAPTURE_ROLES[role] or PRIMARY_PASTE_ANYWHERE_APPS[bundle]) then
+        plog("captura: omitida, " .. tostring(bundle) .. " rol " .. tostring(role) .. " no es texto")
+        return
+    end
 
     local selected = el and el:attributeValue("AXSelectedText")
     if type(selected) == "string" and #selected > 0 then
         primaryText = selected
+        plog("captura: por accesibilidad en " .. tostring(bundle) .. ", " .. #selected .. " caracteres")
         return
     end
 
@@ -667,24 +687,39 @@ local function capturePrimary()
     local before = hs.pasteboard.changeCount()
     hs.eventtap.keyStroke({ "cmd" }, "c", 0, app)
     hs.timer.doAfter(0.15, function()
-        if hs.pasteboard.changeCount() ~= before then
+        if hs.pasteboard.changeCount() ~= before and not screenshotInProgress then
             local text = hs.pasteboard.readString()
             if text and #text > 0 then primaryText = text end
             if saved then hs.pasteboard.writeAllData(saved) end
+            plog("captura: copiando en " .. tostring(bundle) .. ", " .. (text and #text or 0) .. " caracteres")
+        else
+            plog("captura: la copia en " .. tostring(bundle) .. " no produjo nada")
         end
         primaryCapturing = false
     end)
 end
 
+-- Chrome y las apps Electron no dicen por accesibilidad que hay bajo el puntero. La forma del
+-- cursor si: la "I" de texto sobre texto, la mano sobre enlaces, la flecha sobre pestanas.
+local function cursorIsIBeam()
+    if not hs.fs.attributes(CURSORKIND) then return false end
+    local out = hs.execute(CURSORKIND) or ""
+    return out:match("ibeam") ~= nil
+end
+
 local function editableUnder(pos)
     local ok, el = pcall(function() return hs.axuielement.systemElementAtPosition(pos) end)
-    if not ok or not el then return false, nil end
-    local pid = el:pid()
-    local app = pid and hs.application.applicationForPID(pid)
-    if app and PRIMARY_PASTE_ANYWHERE_APPS[app:bundleID()] then return true, app end
-    local role = el:attributeValue("AXRole")
-    if PRIMARY_EDITABLE_ROLES[role] or el:attributeValue("AXEditableAncestor") then return true, app end
-    return false, app
+    local app, role, bundle
+    if ok and el then
+        local pid = el:pid()
+        app = pid and hs.application.applicationForPID(pid)
+        bundle = app and app:bundleID()
+        role = el:attributeValue("AXRole")
+        if bundle and PRIMARY_PASTE_ANYWHERE_APPS[bundle] then return true, app, "app " .. bundle end
+        if PRIMARY_EDITABLE_ROLES[role] or el:attributeValue("AXEditableAncestor") then return true, app, "rol " .. tostring(role) end
+    end
+    if cursorIsIBeam() then return true, app, "cursor de texto sobre " .. tostring(bundle) end
+    return false, app, "no editable: " .. tostring(bundle) .. " rol " .. tostring(role)
 end
 
 primaryTap = hs.eventtap.new({ MT.leftMouseDown, MT.leftMouseUp, MT.otherMouseDown, MT.otherMouseUp }, function(event)
@@ -712,9 +747,10 @@ primaryTap = hs.eventtap.new({ MT.leftMouseDown, MT.leftMouseUp, MT.otherMouseDo
     end
 
     -- boton central pulsado
-    if not primaryText then return false end
+    if not primaryText then plog("clic central: no hay nada seleccionado todavia"); return false end
     local pos = hs.mouse.absolutePosition()
-    local editable, app = editableUnder(pos)
+    local editable, app, why = editableUnder(pos)
+    plog("clic central: " .. (editable and "pega, " or "pasa de largo, ") .. why)
     if not editable then return false end
     primarySwallowUp = true
     local text = primaryText
@@ -743,6 +779,7 @@ dockScroll = {
     overDock = mouseOverDock,
     zone = dockZone,
     primary = function() return primaryText end,
+    primaryLog = function() return primaryLog end,
 }
 
 -- spaceswitch es imprescindible: mueve ventanas entre escritorios y es el respaldo si falta

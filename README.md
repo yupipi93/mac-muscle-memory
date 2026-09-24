@@ -46,7 +46,8 @@ the way so nobody has to rediscover it.
 | <kbd>Option</kbd> <kbd>Tab</kbd>, add <kbd>Shift</kbd> to go back | next window of the same app, like Alt+` on GNOME | Cmd+` |
 | <kbd>Ctrl</kbd> <kbd>Cmd</kbd> <kbd>L</kbd> | lock the session, like Win+L | Ctrl+Cmd+Q |
 | <kbd>Ctrl</kbd> <kbd>Cmd</kbd> <kbd>T</kbd> | new terminal window, like Ctrl+Alt+T | nothing |
-| <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>T</kbd> / <kbd>W</kbd> in Ghostty | new tab / close tab, as in Terminator | Cmd+T / Cmd+W |
+| <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>A</kbd> in Ghostty | split the terminal inside the same tab | Cmd+D |
+| <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>T</kbd> / <kbd>W</kbd> in Ghostty | new tab / close the split or tab, as in Terminator | Cmd+T / Cmd+W |
 
 **Using a Windows keyboard?** In Mac mode, Cmd is its Alt key and Option is its Windows key. The
 shortcut card prints both names on every key and has a **Mac / Windows keyboard** switch.
