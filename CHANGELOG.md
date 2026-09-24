@@ -88,6 +88,12 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-09-24, Ctrl+Backspace deletes a word
+
+- **Ctrl+Backspace** deletes the previous word in every app, sent as Option+Backspace, as on
+  Windows and Ubuntu. Verified in TextEdit: `Uno dos tres` became `Uno dos `, and a plain
+  Backspace still removes a single character. On the card, still one A4 page.
+
 ## 2026-09-24, primary selection captures any text, editable or not
 
 - The capture only ran when the focus was on a text element, so selecting text in a web page

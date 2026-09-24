@@ -154,6 +154,7 @@ Added 2026-09-23:
 | Shortcut | Does | How |
 |----------|------|-----|
 | **Ctrl+Z** | undo | Posted to the app as Cmd+Z, same mechanism as Ctrl+C. |
+| **Ctrl+Backspace** | delete the previous word | Posted as Option+Backspace. Verified in TextEdit: `Uno dos tres` became `Uno dos `; a plain Backspace still deletes one character. |
 | **Ctrl+A** | select all | Posted as Cmd+A. Verified in TextEdit: three typed lines, Ctrl+A then Cmd+C copied all three. |
 | **Ctrl+B** | bold | Posted as Cmd+B. Verified in TextEdit: selected text went from Helvetica to Helvetica-Bold. |
 | **Ctrl+Shift+V** | paste as plain text | See below. Matches Ctrl+Shift+V in Linux terminals. |

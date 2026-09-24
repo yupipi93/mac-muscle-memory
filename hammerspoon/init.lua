@@ -332,6 +332,9 @@ local clipboardShortcuts = {
     -- Una accion en tabla es { modificadores, tecla }; una en texto es Cmd+tecla.
     [hs.keycodes.map.left]  = { plain = { { "alt" }, "left" },  shift = { { "alt", "shift" }, "left" } },
     [hs.keycodes.map.right] = { plain = { { "alt" }, "right" }, shift = { { "alt", "shift" }, "right" } },
+    -- Ctrl+Retroceso borra la palabra anterior, como en Windows y Ubuntu (2026-09-24). En macOS es
+    -- Option+Retroceso.
+    [hs.keycodes.map.delete] = { plain = { { "alt" }, "delete" } },
 }
 
 -- Las flechas llegan siempre con la bandera fn puesta (el teclado las marca asi), de modo que
