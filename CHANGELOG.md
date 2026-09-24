@@ -101,8 +101,9 @@ The card is the repository's public face, so it was rebuilt rather than patched:
   shortcuts are the Windows and Linux ones.
 - Screen only: the measured numbers (desktop switch 1165 to 130 ms, window move 980 ms to
   0.4 s) and a filter box that narrows the list as you type ("tab", "bold", "trash").
-- Print unchanged in purpose: still one A4 page, checked with headless Chrome, with the art,
-  numbers and filter left out.
+- Print unchanged in purpose: still one A4 page, checked with headless Chrome. The keyboard art
+  prints small, the numbers and the filter are left out, and the print type was enlarged to use
+  the whole page now that the layout has room.
 - Finder and Session are now separate groups; the README screenshot is regenerated.
 
 ## 2026-09-24, Option+Tab for the next window of the same app
