@@ -88,6 +88,16 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-09-25, GNU nano, and the extra Chrome icons in the Dock
+
+- `/usr/bin/nano` is really pico. **GNU nano 9.2** from Homebrew now opens instead, with line
+  numbers and colours per file type, from `nano/nanorc` linked to `~/.nanorc`. Ctrl+S saves and
+  Ctrl+Q exits or cancels, because the Ctrl remaps swallow nano's ^X and ^C. Verified in a
+  pseudo-terminal. `apply.sh` installs and links it, `capture.sh` checks the link.
+- Three extra Google Chrome icons had appeared in the Dock's recent-apps section: each headless
+  Chrome run used to render and check the shortcut card counts as a separately launched app.
+  Cleared, and `AGENTS.md` now says to clear them after such runs.
+
 ## 2026-09-24, move to another monitor with Win+Shift+Arrow
 
 - Moving the window to the adjacent monitor is now **Option+Shift+Left / Right** (Win+Shift on a

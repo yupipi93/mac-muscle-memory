@@ -75,7 +75,7 @@ else
 fi
 
 printf '\n\033[1mConfig links\033[0m\n'
-for pair in "$HOME/.hammerspoon/init.lua|$REPO/hammerspoon/init.lua" "$HOME/.config/ghostty/config|$REPO/ghostty/config"; do
+for pair in "$HOME/.hammerspoon/init.lua|$REPO/hammerspoon/init.lua" "$HOME/.config/ghostty/config|$REPO/ghostty/config" "$HOME/.nanorc|$REPO/nano/nanorc"; do
     target="${pair%%|*}"; source="${pair#*|}"
     if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
         printf '  ok    %-46s -> repo\n' "${target/#$HOME/~}"

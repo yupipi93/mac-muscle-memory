@@ -55,8 +55,9 @@ the way so nobody has to rediscover it.
 shortcut card prints both names on every key and has a **Mac / Windows keyboard** switch.
 
 Plus: the mouse wheel scrolls like Windows and Linux, desktops keep a fixed order, screenshots
-land in `~/Pictures/Screenshots` instead of the Desktop, and Ghostty is set up with Linux
-terminal shortcuts and a drop-down Quick Terminal. Every native Cmd shortcut keeps working.
+land in `~/Pictures/Screenshots` instead of the Desktop, Ghostty is set up with Linux terminal
+shortcuts and a drop-down Quick Terminal, and `nano` is the real GNU nano with line numbers,
+colours and Ctrl+S / Ctrl+Q. Every native Cmd shortcut keeps working.
 
 ## Measured, not guessed
 

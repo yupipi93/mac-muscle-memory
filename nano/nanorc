@@ -1,0 +1,24 @@
+## GNU nano (Homebrew), set up the way it behaves on Ubuntu. Symlinked to ~/.nanorc by
+## bin/apply.sh. macOS's own /usr/bin/nano is really pico: no line numbers, no colours.
+
+## Line numbers on the left, and a scroll-position bar on the right.
+set linenumbers
+set indicator
+
+## Colours per file type: every syntax Homebrew's nano ships (YAML, JSON, shell, Python,
+## Markdown, Go, SQL, HTML, CSS, Makefile, nanorc, and more).
+include "/opt/homebrew/share/nano/*.nanorc"
+
+## Editing comfort.
+set autoindent
+set tabsize 4
+
+## Keys that survive the Ctrl remaps of this repo. Hammerspoon turns Ctrl+X and Ctrl+C into cut
+## and copy in every app, terminals included, so nano's usual Exit (^X) and Cancel (^C) never
+## arrive. These two are untouched by the remaps:
+##   Ctrl+S  save                          (as in any editor; nano's own default too)
+##   Ctrl+Q  exit, or cancel the question nano is asking
+## F2 (exit) and F3 (save) keep working as well.
+bind ^S savefile main
+bind ^Q cancel all
+bind ^Q exit main

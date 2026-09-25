@@ -41,6 +41,10 @@ is known not to work.
   hardware UUIDs, email addresses, absolute home paths, employer names or anything about the
   owner's workplace. Write `<repo>` or `$HOME` instead of a real path, and "the owner" instead
   of a name. Grep before every commit.
+- **Headless Chrome leaves Dock clutter.** Every `Google Chrome --headless` run (the card's PDF
+  and screenshot checks) registers as a recent app, and the Dock's recent-apps section fills with
+  extra Chrome icons. Clear it afterwards with
+  `defaults write com.apple.dock recent-apps -array && killall Dock`.
 - **Prefer reversible steps.** Back up before overwriting, and say where the backup is.
 - **State what you could not verify.** Some changes only take effect after a logout or a
   restart. Say so rather than reporting success.

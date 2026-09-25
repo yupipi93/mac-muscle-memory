@@ -11,6 +11,7 @@ wires up all of it; the permissions macOS reserves for a human are in `manual-st
 | [spaceswitch](#spaceswitch) | fires the native desktop shortcut from code | `apply.sh`, compiled from `helper/spaceswitch.c` | `helper/spaceswitch.c` | nothing extra |
 | [Ghostty](#ghostty) | terminal with Linux-style shortcuts | `brew install --cask ghostty` | `ghostty/config` | nothing |
 | [MesloLGS Nerd Font](#ghostty) | terminal font with prompt glyphs | `brew install --cask font-meslo-lg-nerd-font` | referenced by `ghostty/config` | nothing |
+| [GNU nano](#gnu-nano) | terminal editor with line numbers and colours | `brew install nano` | `nano/nanorc` | nothing |
 | [cliclick](#cliclick) | manual debugging only | `brew install cliclick` | none | Accessibility when run from Hammerspoon |
 
 ## Hammerspoon
@@ -99,6 +100,28 @@ Reload after editing with Cmd+Shift+, inside Ghostty. Check a config with
 Remember that the Ctrl remaps apply here too: Ctrl+C copies instead of interrupting (use
 Ctrl+\), and Ctrl+Z and Ctrl+A are undo and select all. `settings.md` explains how to give a
 single app back its native behaviour.
+
+## GNU nano
+
+`/usr/bin/nano` on macOS is not nano: it is a symlink to **pico**, an older editor with no line
+numbers and no syntax colours. Homebrew's GNU nano (9.2 here) is the same editor as on Ubuntu,
+and `/opt/homebrew/bin` comes first in `PATH`, so plain `nano` opens it.
+
+`nano/nanorc`, symlinked to `~/.nanorc`:
+
+- **Line numbers** (`set linenumbers`) and a scroll-position bar (`set indicator`).
+- **Colours per file type**: it includes every syntax Homebrew ships, among them YAML, JSON,
+  shell, Python, Markdown, Go, SQL, HTML, CSS and Makefile. Terraform and Dockerfile are not
+  among them.
+- Auto-indent, tabs shown 4 wide.
+- **Keys that survive this repo's Ctrl remaps.** Hammerspoon turns Ctrl+X and Ctrl+C into cut and
+  copy in every app, so nano's usual Exit (^X) and Cancel (^C) never arrive. Bound instead:
+  **Ctrl+S** save and **Ctrl+Q** exit, or cancel a question nano is asking. F2 (exit) and F3
+  (save) also work.
+
+Verified in a pseudo-terminal: a YAML file opened with numbered lines and colour codes, no
+nanorc errors, and Ctrl+Q, F2 and Ctrl+X each closed nano (Ctrl+X only because a raw
+pseudo-terminal bypasses Hammerspoon; in Ghostty it becomes cut).
 
 ## cliclick
 

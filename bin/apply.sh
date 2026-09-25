@@ -78,6 +78,13 @@ else
     brew install --cask ghostty
     ok "Ghostty installed"
 fi
+# GNU nano: macOS's /usr/bin/nano is really pico, with no line numbers and no colours.
+if brew list nano >/dev/null 2>&1; then
+    ok "GNU nano already installed"
+else
+    brew install nano
+    ok "GNU nano installed"
+fi
 if brew list --cask font-meslo-lg-nerd-font >/dev/null 2>&1; then
     ok "MesloLGS Nerd Font already installed"
 else
@@ -176,6 +183,7 @@ link_config() {
 say "Config files"
 link_config "$REPO/hammerspoon/init.lua" "$HOME/.hammerspoon/init.lua" "Hammerspoon init.lua"
 link_config "$REPO/ghostty/config" "$HOME/.config/ghostty/config" "Ghostty config"
+link_config "$REPO/nano/nanorc" "$HOME/.nanorc" "nano config"
 # Ghostty also reads this second location and it wins over the first. Keep it out of the way
 # so the repo file is the only source of truth.
 GHOSTTY_AS="$HOME/Library/Application Support/com.mitchellh.ghostty/config"
