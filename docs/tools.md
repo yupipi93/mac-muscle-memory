@@ -94,6 +94,15 @@ Font: MesloLGS Nerd Font Mono, 13 pt, so prompt themes that use Nerd Font glyphs
 Ghostty on macOS also reads `~/Library/Application Support/com.mitchellh.ghostty/config`, and that
 file wins over the first. `apply.sh` moves it aside so the repo file is the only source of truth.
 
+**SSH to servers.** Ghostty identifies itself as `TERM=xterm-ghostty`, a terminal type remote
+machines do not know. The symptoms are confusing: zsh repeats every character typed (`htop`
+shows as `htoptophttohtop`) and full-screen programs refuse to start with
+`Error opening terminal: xterm-ghostty`. `shell-integration-features = ssh-env,ssh-terminfo`
+fixes it for every host: on the first connection Ghostty installs its terminfo entry on the
+server with `tic` and caches that it did; where it cannot, it connects as `xterm-256color`.
+It applies to shells opened after a config reload. To install the entry by hand on one host,
+from a Ghostty window: `infocmp -x xterm-ghostty | ssh user@host -- tic -x -`.
+
 Reload after editing with Cmd+Shift+, inside Ghostty. Check a config with
 `ghostty +validate-config`.
 

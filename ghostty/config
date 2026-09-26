@@ -14,6 +14,12 @@ keybind = ctrl+plus=increase_font_size:1
 keybind = ctrl+minus=decrease_font_size:1
 keybind = ctrl+zero=reset_font_size
 
+# SSH: servers do not know the xterm-ghostty terminal type, so zsh repeats what you type and
+# htop fails with "Error opening terminal: xterm-ghostty". Ghostty installs its terminfo on
+# the remote host the first time (ssh-terminfo, needs `tic` there) and falls back to
+# TERM=xterm-256color when it cannot (ssh-env). Applies to shells started after a reload.
+shell-integration-features = ssh-env,ssh-terminfo
+
 # Quick Terminal: Cmd+` shows and hides a drop-down terminal from any app,
 # like Guake or Yakuake on Linux.
 keybind = global:cmd+grave_accent=toggle_quick_terminal

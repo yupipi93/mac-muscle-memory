@@ -88,6 +88,14 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-09-26, SSH from Ghostty works on servers that do not know it
+
+- Connecting by SSH to a Zorin OS server repeated every typed character and htop failed with
+  `Error opening terminal: xterm-ghostty`: the server has no terminfo for Ghostty's terminal
+  type. `ghostty/config` now enables `shell-integration-features = ssh-env,ssh-terminfo`, which
+  installs the terminfo on each host once, or falls back to `xterm-256color`. Documented in
+  `docs/tools.md` with the manual one-liner.
+
 ## 2026-09-25, GNU nano, and the extra Chrome icons in the Dock
 
 - `/usr/bin/nano` is really pico. **GNU nano 9.2** from Homebrew now opens instead, with line
