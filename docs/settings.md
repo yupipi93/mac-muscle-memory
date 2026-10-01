@@ -471,7 +471,9 @@ Ctrl+Cmd+Shift+Left / Right. Rewritten on 2026-09-24 because it took too long to
 
 How it works now, in `moveFocusedWindowToSpace`:
 
-1. Mouse down on the title bar at 85% of the width, then **three 1 px drag events**. Without
+1. Mouse down on the title bar, then **three 1 px drag events**. The point is 85% of the width
+   unless a control sits there, in which case `grabPoint` picks the nearest free gap through
+   Accessibility (since 2026-10-01, for Notes and Finder). Without
    the drag events macOS does not treat the window as grabbed: the desktop switches and the
    window stays behind. Measured both ways.
 2. Fire the native Ctrl+Cmd+Arrow through `spaceswitch`, straight away.

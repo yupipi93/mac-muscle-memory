@@ -38,20 +38,16 @@ events on 2026-09-24), and moving the window directly with SkyLight returns "not
 on macOS 27. Another angle is dragging the window to the screen edge, which flips the desktop
 natively via `workspaces-edge-delay`.
 
-## 3. Title bar grab point is a heuristic
+## 3. Title bar grab point ✅ RESOLVED 2026-10-01
 
-**Status:** working on the apps tested, not guaranteed.
+The fixed 85% point failed in Notes (search field) and Finder (Share button). `grabPoint` now
+reads the title bar through Accessibility and moves off 85% only when a control is there.
+Detail in `docs/macos-27-notes.md`, "Where to grab".
 
-The window move grabs at 85% of the window width. Verified on Cursor maximised. The centre was
-tried first and failed, because that is where Cursor puts its command centre and Chrome puts
-tabs.
-
-**Risk:** an app with a control at 85% will either do nothing or, in a tab strip, tear a tab
-out into a new window.
-
-**Next action:** if a specific app fails, record which one here and pick a different point for
-it. A verify-and-retry loop was considered and rejected, because a failed retry inside a tab
-strip is destructive.
+**If another app fails:** an app whose title bar controls are not exposed to Accessibility
+(some Electron or custom-drawn apps) still gets the blind 85%. Probe it the same way and record
+it here. A verify-and-retry loop stays rejected: a failed retry inside a tab strip is
+destructive.
 
 Machine-specific items (this keyboard, this desktop layout) live in `personal/open-items.md`,
 which git ignores.

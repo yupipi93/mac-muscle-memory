@@ -126,9 +126,32 @@ on app UI and the click opens it instead of dragging:
 This is why the bug only showed up on maximised windows. On a small window the centre falls
 past that UI into empty draggable title bar.
 
-Current choice: **85% of the window width**, 10 px below the top. Verified working on Cursor
-maximised at 2560 px. It is a heuristic, not a guarantee. If it fails on a specific app, that
-app has a control in that region and the point needs revisiting.
+Current choice: **85% of the window width**, 10 px below the top, unless a control is
+there. `grabPoint` walks the window's Accessibility tree along that row (toolbar, groups and
+title text are walked into; scroll areas, web areas, tables and outlines are skipped as
+content) and collects the horizontal span of every other element as a control. If the 85%
+point is within 8 px of one, it grabs at the centre of the nearest free gap instead, never in
+the 80 px of traffic lights. If Accessibility returns nothing, or there is no gap, it falls
+back to 85%. The walk takes about 5 to 25 ms.
+
+Why it is needed: apps with a unified title bar put their toolbar in the same strip, and the
+85% point lands on it. Measured on 2026-10-01:
+
+| App | At 85% | Grabbed instead | Result |
+|-----|--------|-----------------|--------|
+| Notes, 1470 px | search field | gap between Writing Tools and the share group, ~65% | moves |
+| Finder, 920 px | Share button | title text, ~52% | moves |
+| Cursor, Chrome, Ghostty | free | unchanged, 85% | moves, as before |
+
+With the old fixed point the click focused the search field (Notes) or hit Share (Finder),
+the desktop switched and the window stayed behind. Verified both ways with the same script.
+
+Two traps found while testing it from a script:
+
+- `hs.axuielement` only sees windows on the current Space. A window on another desktop has no
+  `AXWindows` entry, so test with a window that is on screen.
+- From an agent's shell the `hs` CLI sometimes hung past its own `-t` timeout. Redirecting
+  its stdin fixed it every time: `hs -c '...' </dev/null`.
 
 ### True fullscreen
 

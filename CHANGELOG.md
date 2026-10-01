@@ -88,6 +88,16 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-10-01, moving a window to another desktop works in Notes and Finder
+
+- Ctrl+Cmd+Shift+Arrow left Notes and Finder windows behind: the fixed grab point at 85% of
+  the width landed on the search field in Notes and on the Share button in Finder, so the
+  click activated the control instead of grabbing the window. `grabPoint` in
+  `hammerspoon/init.lua` now reads the title bar through Accessibility and, only when the 85%
+  point is covered by a control, grabs at the centre of the nearest free gap. Apps where 85%
+  is already free (Cursor, Chrome, Ghostty) keep the old point. Verified end to end, before
+  and after, on both apps; see `docs/macos-27-notes.md`.
+
 ## 2026-09-26, SSH from Ghostty works on servers that do not know it
 
 - Connecting by SSH to a Zorin OS server repeated every typed character and htop failed with

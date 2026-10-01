@@ -176,6 +176,96 @@ local SPACE_MOVE_HOLD = 0.06        -- segundos que se sigue sujetando tras camb
 local SPACE_MOVE_TIMEOUT = 3        -- si la vista no cambia en este tiempo, se suelta igual
 local spaceMoveBusy = false
 
+-- Donde agarrar la barra de titulo. El 85% del ancho funciona en Cursor y Chrome, pero en las
+-- apps con barra unificada (titulo y herramientas en la misma franja) ese punto cae encima de
+-- un control: el buscador en Notas, el boton Compartir en Finder. El clic lo activa y la
+-- ventana no se agarra. Asi que se lee la barra por Accessibility y, si el 85% esta ocupado,
+-- se agarra en el centro del hueco libre mas cercano. Si Accessibility no dice nada (o no hay
+-- hueco) se usa el 85% de siempre, asi que las apps que ya funcionaban no cambian.
+local GRAB_PREFERRED = 0.85         -- fraccion del ancho donde se intenta agarrar primero
+local GRAB_DY = 10                  -- pixeles por debajo del borde superior
+local GRAB_MARGIN = 8               -- distancia minima a cualquier control
+local GRAB_LEFT_RESERVED = 80       -- los tres semaforos de la izquierda
+local GRAB_AX_DEPTH = 6
+local GRAB_AX_BUDGET = 0.15         -- segundos maximos leyendo Accessibility
+
+-- Contenedores y texto: se pueden pisar sin activar nada, y se recorren por dentro.
+local GRAB_PASSTHROUGH_ROLES = {
+    AXWindow = true, AXToolbar = true, AXGroup = true, AXSplitGroup = true,
+    AXStaticText = true, AXImage = true, AXUnknown = true, AXLayoutArea = true,
+}
+-- Contenido de la ventana: nunca forma parte de la barra y recorrerlo es caro (una web
+-- entera en Chrome, miles de filas en Finder). Cualquier otro rol cuenta como control.
+local GRAB_SKIP_ROLES = {
+    AXScrollArea = true, AXWebArea = true, AXTable = true, AXOutline = true,
+    AXBrowser = true, AXList = true, AXSplitter = true,
+}
+
+-- Intervalos [x1, x2] ocupados por controles que cortan la fila y; nil si no se pudo leer.
+local function titleBarControls(win, y)
+    local ok, root = pcall(hs.axuielement.windowElement, win)
+    if not ok or not root then return nil end
+    local deadline = hs.timer.secondsSinceEpoch() + GRAB_AX_BUDGET
+    local blocked = {}
+
+    local function walk(el, depth)
+        if depth > GRAB_AX_DEPTH or hs.timer.secondsSinceEpoch() > deadline then return end
+        for _, child in ipairs(el:attributeValue("AXChildren") or {}) do
+            local role = child:attributeValue("AXRole") or "AXUnknown"
+            local p, s = child:attributeValue("AXPosition"), child:attributeValue("AXSize")
+            if p and s and s.w > 0 and s.h > 0 and y >= p.y and y < p.y + s.h
+                and not GRAB_SKIP_ROLES[role] then
+                if GRAB_PASSTHROUGH_ROLES[role] then
+                    walk(child, depth + 1)
+                else
+                    table.insert(blocked, { p.x, p.x + s.w })
+                end
+            end
+        end
+    end
+
+    local walked = pcall(walk, root, 1)
+    if not walked then return nil end
+    return blocked
+end
+
+local function grabPoint(win)
+    local frame = win:frame()
+    local y = math.floor(frame.y + GRAB_DY)
+    local preferred = math.floor(frame.x + frame.w * GRAB_PREFERRED)
+    local fallback = { x = preferred, y = y, how = "85%" }
+
+    local blocked = titleBarControls(win, y)
+    if not blocked or #blocked == 0 then return fallback end
+
+    local function isFree(x)
+        for _, b in ipairs(blocked) do
+            if x > b[1] - GRAB_MARGIN and x < b[2] + GRAB_MARGIN then return false end
+        end
+        return true
+    end
+    if isFree(preferred) then return fallback end
+
+    table.sort(blocked, function(a, b) return a[1] < b[1] end)
+    local lo, hi = frame.x + GRAB_LEFT_RESERVED, frame.x + frame.w - GRAB_MARGIN
+    local best, bestDistance = nil, math.huge
+    local cursor = lo
+    local function consider(x1, x2)
+        if x2 - x1 < 2 * GRAB_MARGIN + 4 then return end
+        local centre = math.floor((x1 + x2) / 2)
+        local distance = math.abs(centre - preferred)
+        if distance < bestDistance then best, bestDistance = centre, distance end
+    end
+    for _, b in ipairs(blocked) do
+        consider(cursor, math.min(b[1], hi))
+        cursor = math.max(cursor, b[2])
+    end
+    consider(cursor, hi)
+
+    if not best then return fallback end
+    return { x = best, y = y, how = "hueco" }
+end
+
 local function moveFocusedWindowToSpace(direction)
     if spaceMoveBusy then return end
     local win = hs.window.focusedWindow()
@@ -198,9 +288,9 @@ local function moveFocusedWindowToSpace(direction)
 
     -- El centro de la barra de titulo suele estar ocupado (el buscador en Cursor, una
     -- pestana en Chrome) y ahi el clic abre un desplegable en vez de arrastrar, cosa que
-    -- solo se nota con la ventana maximizada. Al 85% del ancho casi siempre hay hueco.
-    local frame = win:frame()
-    local pt = { x = math.floor(frame.x + frame.w * 0.85), y = math.floor(frame.y + 10) }
+    -- solo se nota con la ventana maximizada. grabPoint busca un hueco libre de verdad.
+    local chosen = grabPoint(win)
+    local pt = { x = chosen.x, y = chosen.y }
     local grab = { x = pt.x + 3, y = pt.y }
     local origin = hs.mouse.absolutePosition()
     local before = hs.spaces.activeSpaceOnScreen(screen)
@@ -867,6 +957,7 @@ dockScroll = {
         }
     end,
     moveWindow = moveFocusedWindowToSpace,
+    grabPoint = grabPoint,
     moveScreen = moveWindowToScreen,
     overDock = mouseOverDock,
     zone = dockZone,
