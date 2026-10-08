@@ -26,14 +26,13 @@ What it provides, each explained in `settings.md`:
 - Ctrl+Cmd+Shift+Arrow to take a window to the next desktop, Option+Shift+Arrow (Win+Shift) to the next monitor.
 - Ctrl+C / X / V / Z / A, Ctrl+Shift+V, Ctrl+Arrow and Ctrl+Shift+Arrow in every app.
 - Print Screen crops, saves and copies. Delete and Shift+Delete in Finder.
-- Select text and middle-click to paste it, from a second clipboard, as on Linux.
 - Ctrl+Cmd+L to lock, Ctrl+Cmd+T for a new Ghostty window.
 
 Two techniques do most of the work, and both are documented because neither is obvious:
 
-- **Event taps that rewrite a key** and post the replacement straight to the frontmost app with
-  `hs.eventtap.keyStroke(mods, key, 0, app)`. Posting to the app sidesteps the modifier the user
-  is still holding. Changing the flags of the original event does nothing.
+- **Event taps that rewrite a key** by returning the replacement events from the tap itself,
+  so they go wherever the original key was going (Spotlight and Save panels included).
+  Changing the flags of the original event does nothing.
 - **Child processes inherit Accessibility.** A binary launched by Hammerspoon can post events
   that WindowServer accepts; the same binary started from a shell silently does nothing.
 

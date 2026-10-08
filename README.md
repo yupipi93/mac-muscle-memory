@@ -35,7 +35,6 @@ the way so nobody has to rediscover it.
 |------|------|----------------|
 | <kbd>Ctrl</kbd> <kbd>C</kbd> / <kbd>X</kbd> / <kbd>V</kbd> / <kbd>Z</kbd> / <kbd>A</kbd> / <kbd>B</kbd> | copy, cut, paste, undo, select all, bold, in every app | Cmd instead of Ctrl |
 | <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>V</kbd> | paste without formatting, in every app | a different shortcut per app, or none |
-| Select text, then middle-click | paste the last selection, Linux style, from a second clipboard that Ctrl+C / Ctrl+V never touch | nothing |
 | <kbd>Ctrl</kbd> <kbd>←</kbd> <kbd>→</kbd>, add <kbd>Shift</kbd> to select | jump and select by word | Option+Arrow |
 | <kbd>Ctrl</kbd> <kbd>Backspace</kbd> | delete the previous word | Option+Backspace |
 | <kbd>Print Screen</kbd> | crop an area, save it **and** copy it | no such key |

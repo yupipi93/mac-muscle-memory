@@ -88,6 +88,18 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-10-08, Ctrl+C / Ctrl+V reach Spotlight and Save panels; middle-click paste removed
+
+- **Bug fixed**: the Ctrl remaps posted their Cmd replacement to the frontmost app's PID, so
+  they missed everything that holds the keyboard focus without being that app. Measured: Ctrl+C
+  in Spotlight copied text from Chrome behind it. The tap now returns the replacement events
+  itself, and they go where the original key was going. Verified in TextEdit (Ctrl held down
+  across the key too), a Save sheet and Spotlight.
+- **Watchdog**: every event tap is re-enabled if macOS switched it off for a slow callback.
+- **Removed**: select to copy and middle-click to paste (the Linux primary selection), with its
+  `helper/cursorkind` probe and `screenshotInProgress` guard. It was not being used, and its
+  mouse tap ran Accessibility queries and a subprocess on the main thread for every click.
+
 ## 2026-10-01, moving a window to another desktop works in Notes and Finder
 
 - Ctrl+Cmd+Shift+Arrow left Notes and Finder windows behind: the fixed grab point at 85% of

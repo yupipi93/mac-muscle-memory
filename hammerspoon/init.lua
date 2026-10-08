@@ -507,13 +507,15 @@ local arrowKeyCodes = {
 -- lo que copiaste.
 local PLAIN_PASTE_RESTORE_DELAY = 0.4
 
--- Pega un texto cualquiera y deja el portapapeles como estaba. Lo usan el pegado sin formato
--- y el pegado de la seleccion primaria con el boton central.
-local function pastePreservingClipboard(text, app)
+-- Deja en el portapapeles solo el texto y programa la restauracion del contenido original. El
+-- Cmd+V que lo pega lo emite quien llama.
+local function preparePlainPaste()
+    local text = hs.pasteboard.readString()
+    -- Sin texto (una imagen, un fichero): no hay formato que quitar, pegado normal.
+    if not text then return end
     local saved = hs.pasteboard.readAllData()
     hs.pasteboard.setContents(text)
     local ours = hs.pasteboard.changeCount()
-    hs.eventtap.keyStroke({ "cmd" }, "v", 0, app)
     hs.timer.doAfter(PLAIN_PASTE_RESTORE_DELAY, function()
         if saved and hs.pasteboard.changeCount() == ours then
             hs.pasteboard.writeAllData(saved)
@@ -521,19 +523,23 @@ local function pastePreservingClipboard(text, app)
     end)
 end
 
-local function pastePlain(app)
-    local text = hs.pasteboard.readString()
-    if not text then
-        -- Sin texto (una imagen, un fichero): no hay formato que quitar, pegado normal.
-        hs.eventtap.keyStroke({ "cmd" }, "v", 0, app)
-        return
-    end
-    pastePreservingClipboard(text, app)
+-- Pulsar y soltar, con exactamente estos modificadores.
+local function keyEvents(mods, key)
+    return {
+        hs.eventtap.event.newKeyEvent(mods, key, true),
+        hs.eventtap.event.newKeyEvent(mods, key, false),
+    }
 end
 
 -- Modificar las banderas del evento con setFlags y dejarlo pasar NO funciona: el sistema lo
--- entrega con el Ctrl original. Hay que consumirlo y emitir uno nuevo con Cmd. El evento que
--- emitimos ya no lleva Ctrl, asi que no vuelve a entrar por aqui y no hay bucle.
+-- entrega con el Ctrl original. Hay que consumirlo y poner otro en su lugar.
+--
+-- El sustituto se devuelve desde la propia tap, que lo inserta en el mismo punto del flujo
+-- (2026-10-08). Asi llega a quien iba a recibir la tecla original, con sus banderas tal cual,
+-- sin fusionarse con el Ctrl que sigue pulsado. Antes se enviaba con keyStroke al PID de la
+-- app en primer plano, y fallaba en todo lo que tiene el foco del teclado sin ser esa app:
+-- Spotlight (medido: Ctrl+C copio de Chrome, que estaba detras), los dialogos de Abrir y
+-- Guardar (son otro proceso) y los paneles flotantes como Raycast o 1Password.
 clipboardTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
     if not CLIPBOARD_REMAP_ENABLED then return false end
 
@@ -549,22 +555,19 @@ clipboardTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(eve
     local action = flags.shift and entry.shift or (not flags.shift and entry.plain)
     if not action then return false end
 
-    local app = hs.application.frontmostApplication()
-    if app and CLIPBOARD_PASSTHROUGH_APPS[app:name()] then return false end
+    if next(CLIPBOARD_PASSTHROUGH_APPS) then
+        local app = hs.application.frontmostApplication()
+        if app and CLIPBOARD_PASSTHROUGH_APPS[app:name()] then return false end
+    end
 
     if action == "plainpaste" then
-        pastePlain(app)
-        return true
+        preparePlainPaste()
+        return true, keyEvents({ "cmd" }, "v")
     end
-
-    -- Se envia directamente a la aplicacion en vez de al flujo global: el Ctrl que el usuario
-    -- todavia tiene pulsado se fusionaria con el Cmd inyectado y el atajo no se reconoceria.
     if type(action) == "table" then
-        hs.eventtap.keyStroke(action[1], action[2], 0, app)
-    else
-        hs.eventtap.keyStroke({ "cmd" }, action, 0, app)
+        return true, keyEvents(action[1], action[2])
     end
-    return true
+    return true, keyEvents({ "cmd" }, action)
 end)
 
 clipboardTap:start()
@@ -636,10 +639,6 @@ finderDeleteTap:start()
 -- symbolichotkeys ya nos rompio cosas una vez: ver el aviso sobre `noswoosh setup` y los
 -- atajos 79 y 81 en docs/macos-27-notes.md.
 local SCREENSHOT_REMAP_ENABLED = true
--- Mientras una captura esta en marcha, la seleccion primaria no debe tocar el portapapeles:
--- el arrastre del recorte parece una seleccion de texto, y su "copiar y restaurar" machacaba
--- la imagen recien copiada con el contenido anterior (2026-09-24).
-screenshotInProgress = false
 local SCREENSHOT_SOUND = true
 
 -- Se lee del mismo ajuste del sistema que escribe bin/apply.sh, en vez de repetir la ruta aqui:
@@ -695,11 +694,7 @@ screenshotTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(ev
     if not SCREENSHOT_SOUND then args[#args + 1] = "-x" end
     args[#args + 1] = path
 
-    screenshotInProgress = true
-    runTask("/usr/sbin/screencapture", args, function()
-        copyShotToPasteboard(path)
-        hs.timer.doAfter(1.0, function() screenshotInProgress = false end)
-    end)
+    runTask("/usr/sbin/screencapture", args, function() copyShotToPasteboard(path) end)
     return true
 end)
 
@@ -761,192 +756,6 @@ end)
 dockScrollTap:start()
 
 -- Expuesto para probar desde la terminal: hs -c "dockScroll.switch(1)"
--- Seleccion primaria al estilo de Linux (2026-09-24): seleccionar texto lo copia a un
--- portapapeles APARTE, y el boton central del raton lo pega. Ctrl+C / Ctrl+V no se enteran.
---
--- Captura: tras un arrastre, un doble o triple clic, o un Shift+clic, se lee lo seleccionado.
--- Primero por accesibilidad (AXSelectedText), que no toca nada. Si la app no lo expone, como
--- las paginas web o los terminales, se hace un Cmd+C y se restaura el portapapeles al momento.
--- Solo se intenta si el foco esta en algo que contiene texto, para no copiar ficheros al
--- arrastrar en Finder ni nada parecido.
---
--- Pegado: solo si bajo el puntero hay algo editable (campo, area de texto, editor web) o una
--- app de PRIMARY_PASTE_ANYWHERE_APPS. En cualquier otro sitio el clic central sigue haciendo
--- lo suyo: abrir un enlace en otra pestana, cerrar una pestana. Como en Ubuntu, primero se
--- coloca el cursor donde esta el puntero y luego se pega.
-local PRIMARY_ENABLED = true
--- Si el arrastre empieza sobre uno de estos, no es una seleccion de texto: mover una ventana,
--- una barra de desplazamiento, un separador. No se captura.
-local PRIMARY_NOT_TEXT_ROLES = {
-    AXWindow = true, AXToolbar = true, AXButton = true, AXScrollBar = true, AXSplitter = true,
-    AXTabGroup = true, AXRadioButton = true, AXSlider = true, AXImage = true, AXMenuBar = true,
-    AXMenuBarItem = true, AXDockItem = true, AXList = true, AXPopUpButton = true, AXCheckBox = true,
-}
-local PRIMARY_EDITABLE_ROLES = { AXTextArea = true, AXTextField = true, AXComboBox = true, AXSearchField = true }
--- Apps donde el boton central pega en cualquier punto de la ventana. Chrome y las apps Electron
--- (Cursor, VS Code) no exponen por accesibilidad si bajo el puntero hay un campo de texto o un
--- enlace, asi que por defecto NO pegan: romperia "abrir enlace en otra pestana" y "cerrar
--- pestana". Anadelas aqui si prefieres pegar siempre. Su bundle id: osascript -e 'id of app "X"'.
-local PRIMARY_PASTE_ANYWHERE_APPS = { ["com.mitchellh.ghostty"] = true }
--- Apps donde nunca se captura: en Finder, arrastrar selecciona ficheros, no texto.
-local PRIMARY_IGNORE_APPS = { ["com.apple.finder"] = true }
-
-local primaryText = nil
--- Registro corto de lo que ha hecho la seleccion primaria, para diagnosticar sin adivinar:
---   hs -c 'return table.concat(dockScroll.primaryLog(), "\n")'
-local primaryLog = {}
-local function plog(msg)
-    primaryLog[#primaryLog + 1] = os.date("%H:%M:%S ") .. msg
-    if #primaryLog > 40 then table.remove(primaryLog, 1) end
-end
-local CURSORKIND = REPO .. "/helper/cursorkind"
-local primaryDownAt = nil
-local primarySwallowUp = false
-local primaryCapturing = false
-local P = hs.eventtap.event.properties
-local MT = hs.eventtap.event.types
-
-local function axFocused()
-    local ok, el = pcall(function()
-        return hs.axuielement.systemWideElement():attributeValue("AXFocusedUIElement")
-    end)
-    return ok and el or nil
-end
-
-local function selectedTextOf(el)
-    if not el then return nil end
-    local ok, t = pcall(function() return el:attributeValue("AXSelectedText") end)
-    if ok and type(t) == "string" and #t > 0 then return t end
-    return nil
-end
-
-local function elementAt(pos)
-    if not pos then return nil end
-    local ok, el = pcall(function() return hs.axuielement.systemElementAtPosition(pos) end)
-    return ok and el or nil
-end
-
--- Captura CUALQUIER texto seleccionado, este donde este: un campo, una pagina, una etiqueta, un
--- mensaje. Primero por accesibilidad, mirando el elemento con el foco y despues el que hay bajo
--- el puntero y sus contenedores, que es donde vive el texto no editable. Si nadie la expone, se
--- copia y se restaura el portapapeles.
-local function capturePrimary(downAt, upAt)
-    if primaryCapturing then return end
-    if screenshotInProgress then plog("captura: omitida, hay una captura de pantalla en curso"); return end
-    local app = hs.application.frontmostApplication()
-    local bundle = app and app:bundleID()
-    if bundle == "com.apple.screencaptureui" then return end
-    if PRIMARY_IGNORE_APPS[bundle] then plog("captura: omitida en " .. tostring(bundle)); return end
-
-    local startEl = elementAt(downAt)
-    local startRole = startEl and startEl:attributeValue("AXRole")
-    if startRole and PRIMARY_NOT_TEXT_ROLES[startRole] then
-        plog("captura: omitida, el arrastre empezo sobre " .. startRole)
-        return
-    end
-
-    local text = selectedTextOf(axFocused())
-    if not text then
-        local el = elementAt(upAt) or startEl
-        for _ = 1, 6 do
-            if not el then break end
-            text = selectedTextOf(el)
-            if text then break end
-            local ok, parent = pcall(function() return el:attributeValue("AXParent") end)
-            el = ok and parent or nil
-        end
-    end
-    if text then
-        primaryText = text
-        plog("captura: por accesibilidad en " .. tostring(bundle) .. ", " .. #text .. " caracteres")
-        return
-    end
-
-    -- Nadie expone la seleccion: se copia y se restaura el portapapeles.
-    primaryCapturing = true
-    local saved = hs.pasteboard.readAllData()
-    local before = hs.pasteboard.changeCount()
-    hs.eventtap.keyStroke({ "cmd" }, "c", 0, app)
-    hs.timer.doAfter(0.15, function()
-        if hs.pasteboard.changeCount() ~= before and not screenshotInProgress then
-            local copied = hs.pasteboard.readString()
-            if copied and #copied > 0 then primaryText = copied end
-            if saved then hs.pasteboard.writeAllData(saved) end
-            plog("captura: copiando en " .. tostring(bundle) .. ", " .. (copied and #copied or 0) .. " caracteres")
-        else
-            plog("captura: nada que copiar en " .. tostring(bundle) .. " (rol de inicio " .. tostring(startRole) .. ")")
-        end
-        primaryCapturing = false
-    end)
-end
-
--- Chrome y las apps Electron no dicen por accesibilidad que hay bajo el puntero. La forma del
--- cursor si: la "I" de texto sobre texto, la mano sobre enlaces, la flecha sobre pestanas.
-local function cursorIsIBeam()
-    if not hs.fs.attributes(CURSORKIND) then return false end
-    local out = hs.execute(CURSORKIND) or ""
-    return out:match("ibeam") ~= nil
-end
-
-local function editableUnder(pos)
-    local ok, el = pcall(function() return hs.axuielement.systemElementAtPosition(pos) end)
-    local app, role, bundle
-    if ok and el then
-        local pid = el:pid()
-        app = pid and hs.application.applicationForPID(pid)
-        bundle = app and app:bundleID()
-        role = el:attributeValue("AXRole")
-        if bundle and PRIMARY_PASTE_ANYWHERE_APPS[bundle] then return true, app, "app " .. bundle end
-        if PRIMARY_EDITABLE_ROLES[role] or el:attributeValue("AXEditableAncestor") then return true, app, "rol " .. tostring(role) end
-    end
-    if cursorIsIBeam() then return true, app, "cursor de texto sobre " .. tostring(bundle) end
-    return false, app, "no editable: " .. tostring(bundle) .. " rol " .. tostring(role)
-end
-
-primaryTap = hs.eventtap.new({ MT.leftMouseDown, MT.leftMouseUp, MT.otherMouseDown, MT.otherMouseUp }, function(event)
-    if not PRIMARY_ENABLED or spaceMoveBusy then return false end
-    local t = event:getType()
-
-    if t == MT.leftMouseDown then
-        primaryDownAt = event:location()
-        return false
-    end
-    if t == MT.leftMouseUp then
-        local pos = event:location()
-        local clicks = event:getProperty(P.mouseEventClickState) or 1
-        local moved = primaryDownAt and (math.abs(pos.x - primaryDownAt.x) + math.abs(pos.y - primaryDownAt.y) > 4)
-        if moved or clicks >= 2 or event:getFlags().shift then
-            local downAt = primaryDownAt
-            hs.timer.doAfter(0.08, function() capturePrimary(downAt, pos) end)
-        end
-        return false
-    end
-
-    if event:getProperty(P.mouseEventButtonNumber) ~= 2 then return false end
-    if t == MT.otherMouseUp then
-        if primarySwallowUp then primarySwallowUp = false; return true end
-        return false
-    end
-
-    -- boton central pulsado
-    if not primaryText then plog("clic central: no hay nada seleccionado todavia"); return false end
-    local pos = hs.mouse.absolutePosition()
-    local editable, app, why = editableUnder(pos)
-    plog("clic central: " .. (editable and "pega, " or "pasa de largo, ") .. why)
-    if not editable then return false end
-    primarySwallowUp = true
-    local text = primaryText
-    hs.timer.doAfter(0, function()
-        hs.eventtap.leftClick(pos)
-        hs.timer.doAfter(0.06, function()
-            pastePreservingClipboard(text, app or hs.application.frontmostApplication())
-        end)
-    end)
-    return true
-end)
-
-primaryTap:start()
-
 dockScroll = {
     switch = pressSpaceShortcut,
     hint = showSwitchHint,
@@ -961,9 +770,16 @@ dockScroll = {
     moveScreen = moveWindowToScreen,
     overDock = mouseOverDock,
     zone = dockZone,
-    primary = function() return primaryText end,
-    primaryLog = function() return primaryLog end,
 }
+
+-- macOS apaga una tap sin avisar si un callback tarda demasiado, y Hammerspoon no la vuelve a
+-- encender. Desde fuera parece que Ctrl+C "a veces" no funciona. Se revisan cada pocos
+-- segundos y se reactivan. Global para que el recolector de basura no se lleve el temporizador.
+tapWatchdog = hs.timer.doEvery(3, function()
+    for _, tap in ipairs({ clipboardTap, tileTap, finderDeleteTap, screenshotTap, dockScrollTap }) do
+        if not tap:isEnabled() then tap:start() end
+    end
+end)
 
 -- spaceswitch es imprescindible: mueve ventanas entre escritorios y es el respaldo si falta
 -- noswoosh. cliclick ya no se usa en tiempo de ejecucion desde 2026-09-24.

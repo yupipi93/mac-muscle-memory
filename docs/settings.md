@@ -135,20 +135,43 @@ Chosen over Cmd+Shift+arrow, which editors use for selecting to the start or end
 **Ctrl+C / Ctrl+V / Ctrl+X** work alongside the native Cmd equivalents, for Windows and Linux
 muscle memory.
 
-Two approaches failed first, both for reasons worth remembering:
-
-1. Mutating the event with `event:setFlags({cmd = true})` and letting it through does nothing.
-   The system still delivers the original Ctrl.
-2. Consuming it and returning replacement `newKeyEvent` events also fails, and it is the same
-   modifier contamination that broke the desktop shortcut: the user is **still physically
-   holding Ctrl**, so it merges into the injected Cmd and the app sees Ctrl+Cmd+C.
-
-What works is posting the keystroke **straight to the application**, which bypasses the global
-modifier state:
+The key event is consumed and **replaced from inside the tap**: the callback returns
+`true` plus a Cmd keyDown and keyUp built with `newKeyEvent`. The tap inserts them at the same
+point of the event stream, so they reach whatever was going to receive the original key, with
+exactly the flags they were built with.
 
 ```lua
-hs.eventtap.keyStroke({ "cmd" }, key, 0, app)
+return true, keyEvents({ "cmd" }, key)
 ```
+
+Mutating the event with `event:setFlags({cmd = true})` and letting it through does nothing:
+the system still delivers the original Ctrl.
+
+**Until 2026-10-08 the replacement was posted to the frontmost app's PID** with
+`hs.eventtap.keyStroke({ "cmd" }, key, 0, app)`. It failed wherever the keyboard focus is not
+in the frontmost app: Spotlight (measured: Ctrl+C in Spotlight copied a page from Chrome,
+which sat behind it), Open and Save panels (another process), and floating panels such as
+Raycast or 1Password. These notes once said that returning replacement events let the held
+Ctrl merge into the Cmd. Re-measured on 2026-10-08 with Ctrl held down through a real
+flagsChanged event across the key: Ctrl+A, C, V and Z all behaved as Cmd, no merge.
+
+Verified on 2026-10-08:
+
+| Where | Keys | Result |
+|-------|------|--------|
+| TextEdit | Ctrl+A, C, X, V, Z, Shift+V, Ctrl+Left | all as their Cmd / Option equivalents |
+| TextEdit, Ctrl held across the key | Ctrl+A, C, V, Z | same, no Ctrl+Cmd merge |
+| TextEdit Save sheet, name field | Ctrl+A, C, then V | copied `Untitled`, pasted `pegado-ok` |
+| Spotlight | type `pruebaspot`, Ctrl+A, C | clipboard `pruebaspot` (before: text from Chrome) |
+
+**Watchdog.** macOS disables an event tap silently when a callback is too slow, and
+Hammerspoon does not turn it back on, which from the outside looks like "Ctrl+C sometimes does
+nothing". `tapWatchdog` re-enables any stopped tap every 3 seconds.
+
+**Secure input.** While a password field (or an app with secure keyboard entry, such as a
+terminal option) holds secure input, no event tap sees the keyboard, so Ctrl+C reaches the app
+as Ctrl+C. Nothing can work around that. Check it with
+`hs -c 'return hs.eventtap.isSecureInputEnabled()'`.
 
 ### Undo, and paste without formatting
 
@@ -156,10 +179,10 @@ Added 2026-09-23:
 
 | Shortcut | Does | How |
 |----------|------|-----|
-| **Ctrl+Z** | undo | Posted to the app as Cmd+Z, same mechanism as Ctrl+C. |
-| **Ctrl+Backspace** | delete the previous word | Posted as Option+Backspace. Verified in TextEdit: `Uno dos tres` became `Uno dos `; a plain Backspace still deletes one character. |
-| **Ctrl+A** | select all | Posted as Cmd+A. Verified in TextEdit: three typed lines, Ctrl+A then Cmd+C copied all three. |
-| **Ctrl+B** | bold | Posted as Cmd+B. Verified in TextEdit: selected text went from Helvetica to Helvetica-Bold. |
+| **Ctrl+Z** | undo | Replaced with Cmd+Z, same mechanism as Ctrl+C. |
+| **Ctrl+Backspace** | delete the previous word | Replaced with Option+Backspace. Verified in TextEdit: `Uno dos tres` became `Uno dos `; a plain Backspace still deletes one character. |
+| **Ctrl+A** | select all | Replaced with Cmd+A. Verified in TextEdit: three typed lines, Ctrl+A then Cmd+C copied all three. |
+| **Ctrl+B** | bold | Replaced with Cmd+B. Verified in TextEdit: selected text went from Helvetica to Helvetica-Bold. |
 | **Ctrl+Shift+V** | paste as plain text | See below. Matches Ctrl+Shift+V in Linux terminals. |
 
 **macOS has no universal plain-paste shortcut.** Chrome and native apps use Cmd+Alt+Shift+V,
@@ -168,7 +191,7 @@ always be missing an app, `pastePlain` works the same everywhere:
 
 1. Save the whole pasteboard, every type, with `hs.pasteboard.readAllData()`.
 2. Replace it with only its plain-text string.
-3. Send an ordinary Cmd+V to the app.
+3. Replace the key with an ordinary Cmd+V.
 4. After 0.4 s, write the saved contents back, so the next Ctrl+V pastes with formatting again.
 
 The delay exists because the app reads the pasteboard asynchronously after receiving Cmd+V;
@@ -355,71 +378,6 @@ Still bound to Ctrl+Arrow by the system: **Ctrl+Up** (Mission Control) and **Ctr
 Possible conflict: some apps use Ctrl+Cmd+Left / Right themselves, for example VS Code family
 editors for moving an editor between groups. The system shortcut wins, so those app bindings no
 longer fire.
-
-## Select to copy, middle-click to paste
-
-The X11 primary selection that Ubuntu users rely on, added 2026-09-24. Selecting text copies it
-to a **second clipboard**; the middle mouse button pastes it. Ctrl+C / Ctrl+V and the normal
-clipboard are never affected.
-
-**Capture: any selected text, wherever it is.** After a drag, a double or triple click, or a
-Shift+click, `init.lua` reads the selection. Editable or not: a field, a web page, a label, a
-message, a terminal.
-
-1. Through Accessibility (`AXSelectedText`), which touches nothing: first the focused element,
-   then the element under the pointer and up to six of its containers, which is where
-   non-editable text lives.
-2. If nothing exposes the selection (Chrome and Electron apps expose nothing, terminals no
-   selection), it sends Cmd+C and restores the clipboard straight after, every type, from
-   `hs.pasteboard.readAllData()`.
-
-It does not try when the drag started on something that is not text (a title bar, a button, a
-scroll bar, a splitter, the Dock), nor in Finder, where dragging selects files. The first version
-only captured when the focus was on a text element, which missed exactly the non-editable text
-people most often want to grab; fixed on 2026-09-24.
-
-**Paste.** Only where there is something editable under the pointer, as Ubuntu does: a text
-field, a text area, a web editor with an editable ancestor, or an app in
-`PRIMARY_PASTE_ANYWHERE_APPS` (Ghostty by default). The caret is first moved to the pointer with
-a click, then the text is pasted with the same clipboard-preserving swap as Ctrl+Shift+V.
-Anywhere else the middle click passes through untouched: opening a link in a new tab or closing
-a tab keep working.
-
-**Cursor shape, for apps that expose nothing.** When Accessibility cannot say what is under the
-pointer, `helper/cursorkind` asks macOS which cursor is showing: the text I-beam means paste, a
-pointing hand (a link) or the arrow (a tab) means let the middle click through. It is a second
-signal, only consulted when Accessibility has nothing, so it can only add paste targets.
-Synthetic pointer moves did not change the reported cursor in testing, so this path still needs
-confirming with a real mouse.
-
-**Screenshots.** The crop drag of the Print Screen key looks exactly like a text selection. The
-copy-and-restore capture used to fire on it and restore the old clipboard over the screenshot
-that had just been copied. Capture now stands down while a screenshot is in progress
-(`screenshotInProgress`), and never runs inside the screenshot UI.
-
-**Diagnosing.** A short log of every capture and middle click, with the decision and the reason:
-
-```bash
-hs -c 'return table.concat(dockScroll.primaryLog(), "\n")'
-```
-
-**Limitation, measured.** Chrome and Electron apps such as Cursor expose nothing under the
-pointer (only a generic scroll area, even with `AXManualAccessibility` set), so there is no way
-to tell a text field from a link or a tab. Selecting in them **does** capture; middle-click
-pasting into them is **off** by default so links and tabs keep their middle-click behaviour. Add
-an app's bundle id to `PRIMARY_PASTE_ANYWHERE_APPS` to paste there regardless.
-
-Verified:
-
-| Where | Action | Result |
-|-------|--------|--------|
-| TextEdit, `alfa beta gamma`, clipboard holding `NORMAL` | double-click `beta` | second clipboard `beta`, clipboard still `NORMAL` |
-| same | drag across `gamma` | second clipboard `gamma`, clipboard still `NORMAL` |
-| same | middle-click after the text | document `alfa beta gammabeta`, clipboard still `NORMAL` |
-| Chrome, a web page | double-click a word | captured through the copy-and-restore path, clipboard restored |
-| Safari, a page heading (not editable) | double-click a word | `Ubuntu` captured, clipboard still `NORMAL` |
-
-`PRIMARY_ENABLED = false` in `init.lua` turns it off.
 
 ## Place windows like Ubuntu: Option+Arrow
 
