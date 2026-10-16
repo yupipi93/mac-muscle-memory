@@ -13,7 +13,7 @@ wires up all of it; the permissions macOS reserves for a human are in `manual-st
 | [MesloLGS Nerd Font](#ghostty) | terminal font with prompt glyphs | `brew install --cask font-meslo-lg-nerd-font` | referenced by `ghostty/config` | nothing |
 | [GNU nano](#gnu-nano) | terminal editor with line numbers and colours | `brew install nano` | `nano/nanorc` | nothing |
 | [cliclick](#cliclick) | manual debugging only | `brew install cliclick` | none | Accessibility when run from Hammerspoon |
-| [Update Cursor](#update-cursor) | updates Cursor on an account without admin rights | `apply.sh`, built by `bin/build-update-cursor-app.sh` | `bin/cursor-update.sh` | admin rights for the moment of the swap, while Cursor lives in `/Applications` |
+| [Update Cursor](#update-cursor) | keeps Cursor updatable on an account without admin rights | `apply.sh`, built by `bin/build-update-cursor-app.sh` | `bin/cursor-update.sh`, `tests/cursor-update.test.sh` | admin rights once, to move an old copy out of `/Applications` |
 
 ## Hammerspoon
 
@@ -149,37 +149,71 @@ be answered. And when an elevated update does go through, Squirrel's privileged 
 leaves `Cursor.app` owned by root, so changing the owner alone fixes nothing: the folder is
 still the obstacle.
 
-**The button.** `~/Applications/Update Cursor.app` (Spotlight: "Update Cursor"). One click:
+**The fix.** A `Cursor.app` in `~/Applications` that belongs to the user. Squirrel can replace
+it by itself from then on, so the elevation problem disappears instead of being worked around.
+Settings, extensions and permissions do not depend on where the bundle lives.
 
-1. Asks Cursor's own update feed (`api2.cursor.sh/updates`, the one Squirrel polls) for the
-   latest build. Already current: says so and stops.
-2. Offers **Update only** or **Update and move** (see below).
-3. Downloads the zip and refuses it unless the code signature is valid, the Team ID is
-   Cursor's developer (`VDXQ22DGB9`) and the bundle id is Cursor's.
-4. If admin rights are not active yet, waits: a dialog opens the elevation app and continues
-   once the account is back in the `admin` group.
-5. Quits Cursor (asking again if unsaved changes keep it open), swaps the bundle through the
-   standard macOS admin dialog, and reopens it. Only whole bundles are renamed, and the old one
-   is restored if the new one cannot be put in place.
+**The button.** `~/Applications/Update Cursor.app` (Spotlight: "Update Cursor") gets there in
+one step, and updates on demand later. Click it with Cursor open: it runs detached, so it
+survives Cursor closing. When all is well it says so and does nothing. Otherwise it shows the
+plan and, once confirmed:
 
-Run it with Cursor open: it runs detached, so it survives Cursor closing. Log:
-`~/Library/Logs/cursor-update.log`.
+1. Picks the target build: the latest from Cursor's update feed (`api2.cursor.sh/updates`, the
+   one Squirrel polls), or an installed copy if that one is newer or the feed is unreachable.
+2. Prepares a fresh `Cursor.app` owned by the user in `~/Library/Caches/cursor-update`: unzips
+   the download or copies the installed bundle. Rejects it unless the code signature is valid,
+   the Team ID is Cursor's developer (`VDXQ22DGB9`), the bundle id and version match, and every
+   file belongs to the user.
+3. Waits for admin rights only if an old copy sits where the user cannot write (a dialog opens
+   the elevation app).
+4. Closes Cursor (asking again if unsaved changes keep it open), lets Squirrel finish if
+   quitting started it, and checks nothing changed meanwhile.
+5. Sets every old copy aside (renamed, never modified) and moves the new one into place.
+6. Opens it and waits until it runs. If it does not, puts every old copy back and reopens the
+   previous Cursor.
+7. Only then deletes the old copies it is allowed to delete, and reports any it is not, with
+   their location.
 
-**The permanent fix: Update and move.** Moving Cursor to `~/Applications`, which the user owns,
-removes the problem for good: Squirrel can then write the bundle and its folder, and Cursor's
-built-in updater installs every future version with no password. It is a one-time step that
-needs admin rights once (to take the bundle out of `/Applications`). Cursor keeps its settings,
-extensions and permissions, since none of those depend on where the bundle lives. A Dock icon
-that pointed at the old path may need dragging in again.
+Log: `~/Library/Logs/cursor-update.log`. The Dock and Spotlight keep working: their bookmarks
+prefer the path when something is at it, so they open the new bundle (checked).
+
+### Lessons from the first version, which broke Cursor on 2026-10-16
+
+The first version moved the root-owned bundle to `~/Applications` and then ran
+`chown -R` on it. **macOS App Management refuses any change inside a launched, notarized app
+bundle, even to root** ("Operation not permitted" on every file). Renaming the whole bundle is
+allowed. The script had no undo for that step and no relaunch from the new path, and its message
+said the old version was still in place when it was not. Cursor was left closed, at a new path,
+owned by root. What the rewrite does about each:
+
+| Failure | Rule now |
+|---------|----------|
+| `chown` inside the bundle refused by App Management | Nothing inside an installed bundle is ever changed. The new bundle is a fresh copy made by the user, so it is the user's from the start. |
+| A step failed with no way back | Every rename goes to a journal first; any failure puts all copies back. |
+| Cursor left closed | The new Cursor must be seen running, or the old one is restored and reopened. |
+| The message described the intended state | Messages read the state back from disk. |
+| Old copy deleted too early, or never | Deleted only after the new Cursor runs, and only if the user owns it. |
+
+The tests also caught two traps worth knowing: `ps | grep -q` under `set -o pipefail` reports
+"not running" for a running process (grep exits early, ps dies of SIGPIPE), which would have
+skipped closing Cursor; and macOS denies writes to a bundle for about half a second while it
+assesses its first launch.
+
+### Commands and tests
 
 From a terminal (not from Cursor's own terminal, which dies when Cursor quits):
 
 ```bash
-bin/cursor-update.sh --check            # installed vs latest, where it lives, admin now or not
-bin/cursor-update.sh                    # update if there is a newer build
-bin/cursor-update.sh --move             # update if needed and move to ~/Applications
-bin/cursor-update.sh --force --dry-run  # download and verify only, touch nothing
+bin/cursor-update.sh --check     # copies installed, latest build, the plan, admin needed or not
+bin/cursor-update.sh --dry-run   # also prepare and verify the new bundle; change nothing
+bin/cursor-update.sh             # do it
+tests/cursor-update.test.sh      # 19 scenarios on fake apps, failures injected at every step
 ```
+
+The tests build stay-open AppleScript applets as fake Cursors in a temporary folder (paths with
+spaces and an apostrophe), run the script with `/bin/bash` 3.2 as the app does, and check the
+disk and the processes afterwards. They cannot reproduce App Management or the admin dialog; the
+privileged path runs the same quoted command through `/bin/sh` instead.
 
 The app carries its own copy of the script. After editing `bin/cursor-update.sh`, run
 `bin/build-update-cursor-app.sh` (or `apply.sh`) to rebuild it.

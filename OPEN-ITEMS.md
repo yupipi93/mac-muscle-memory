@@ -53,12 +53,16 @@ destructive.
 
 **Status:** open since 2026-10-16.
 
-Everything up to the swap is verified (see the changelog). Not verified yet: replacing the
-installed `/Applications/Cursor.app`. One risk to watch: macOS App Management protection can
-refuse to let a process other than the app's own updater rename a notarized app bundle. If the
-first run reports "Operation not permitted", allow "Update Cursor" under System Settings >
-Privacy & Security > App Management (needs admin) and run it again. Once Cursor lives in
-`~/Applications` the question goes away, because Cursor's own updater does the work.
+The first version broke Cursor (see the changelog); the rewrite passes its test suite and a
+dry run on the real machine. Still to confirm on the real machine:
+
+1. The first real run of the rewrite: one user-owned Cursor left in `~/Applications`, running,
+   with nothing left in `/Applications`. Root renaming whole notarized bundles was already seen
+   working on 2026-10-16; the rewrite does nothing else as root.
+2. Whether App Management also refuses deleting a launched bundle the user owns. If it does,
+   the run reports the leftover folder instead of deleting it; record the answer here.
+3. That Cursor's own updater installs the next release with no password. Only observable when
+   Cursor ships a new version.
 
 Machine-specific items (this keyboard, this desktop layout) live in `personal/open-items.md`,
 which git ignores.

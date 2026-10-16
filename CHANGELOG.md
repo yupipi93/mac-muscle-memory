@@ -88,17 +88,28 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
-## 2026-10-16, Update Cursor: a button for updating Cursor without admin rights
+## 2026-10-16, Update Cursor: a button for keeping Cursor updatable without admin rights
 
 - **Added** `bin/cursor-update.sh` and `~/Applications/Update Cursor.app` (built by
   `bin/build-update-cursor-app.sh`, wired into `apply.sh`). Without admin rights, Cursor's
   own updater cannot write `/Applications`, and its authorization dialog appears before
-  just-in-time elevation can be turned on. The button updates on demand once elevation is
-  active, verifies the download's signature, and offers to move Cursor to `~/Applications`,
-  after which the built-in updater needs no password. Detail in `docs/tools.md`.
-- Verified: the update feed's two answers (204 current, 200 with the zip), download and
-  signature check, the bundle swap, the move and the rollback, on a copy outside
-  `/Applications`. Not yet verified: a real swap of the installed Cursor, see `OPEN-ITEMS.md`.
+  just-in-time elevation can be turned on. The button puts a user-owned Cursor in
+  `~/Applications`, after which the built-in updater needs no password, and updates on demand.
+- **Fixed, the same day: the first version broke Cursor.** Its "move" step ran `chown -R` on the
+  moved bundle; macOS App Management refused it on every file, the step had no undo, Cursor was
+  not reopened, and the message claimed the old version was still in place. Cursor ended up
+  closed, at a new path, owned by root. Rewritten around rules that keep Cursor working
+  whatever fails: nothing inside an installed bundle is changed (the new one is a fresh copy
+  owned by the user), renames are journaled and undone on any failure, the new Cursor must be
+  seen running or the old one comes back, old copies are deleted only after that, and every
+  message reads the state from disk. Detail in `docs/tools.md`.
+- **Added** `tests/cursor-update.test.sh`: 19 scenarios, 114 checks, on fake apps, with failures
+  injected at every step. They caught two more bugs before release: `ps | grep -q` under
+  `pipefail` reported a running Cursor as closed (so it would not have been closed before the
+  swap), and a false "not entirely yours" warning during macOS's first-launch assessment.
+- Verified on the real machine without changing anything: `--check` and `--dry-run` plan and
+  verify the fix for its current state. The real swap needs admin rights and closes Cursor, so it
+  is the owner's to run; see `OPEN-ITEMS.md`.
 
 ## 2026-10-08, Ctrl+C / Ctrl+V reach Spotlight and Save panels; middle-click paste removed
 
