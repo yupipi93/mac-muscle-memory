@@ -88,6 +88,18 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-10-16, Update Cursor: a button for updating Cursor without admin rights
+
+- **Added** `bin/cursor-update.sh` and `~/Applications/Update Cursor.app` (built by
+  `bin/build-update-cursor-app.sh`, wired into `apply.sh`). Without admin rights, Cursor's
+  own updater cannot write `/Applications`, and its authorization dialog appears before
+  just-in-time elevation can be turned on. The button updates on demand once elevation is
+  active, verifies the download's signature, and offers to move Cursor to `~/Applications`,
+  after which the built-in updater needs no password. Detail in `docs/tools.md`.
+- Verified: the update feed's two answers (204 current, 200 with the zip), download and
+  signature check, the bundle swap, the move and the rollback, on a copy outside
+  `/Applications`. Not yet verified: a real swap of the installed Cursor, see `OPEN-ITEMS.md`.
+
 ## 2026-10-08, Ctrl+C / Ctrl+V reach Spotlight and Save panels; middle-click paste removed
 
 - **Bug fixed**: the Ctrl remaps posted their Cmd replacement to the frontmost app's PID, so

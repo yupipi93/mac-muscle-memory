@@ -149,6 +149,12 @@ else
     fi
 fi
 
+say "Update Cursor app"
+# On an account without admin rights, Cursor in /Applications cannot update itself. This
+# app updates it on demand once elevation is active, and can move it to ~/Applications so
+# it never needs admin again. See docs/tools.md.
+"$REPO/bin/build-update-cursor-app.sh" | sed 's/^/  ok   /' || warn "could not build Update Cursor.app"
+
 # Symlink a config file from this repo into place, backing up whatever was there.
 link_config() {
     local source="$1" target="$2" label="$3"

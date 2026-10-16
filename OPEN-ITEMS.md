@@ -49,5 +49,16 @@ Detail in `docs/macos-27-notes.md`, "Where to grab".
 it here. A verify-and-retry loop stays rejected: a failed retry inside a tab strip is
 destructive.
 
+## 4. Update Cursor: first real run
+
+**Status:** open since 2026-10-16.
+
+Everything up to the swap is verified (see the changelog). Not verified yet: replacing the
+installed `/Applications/Cursor.app`. One risk to watch: macOS App Management protection can
+refuse to let a process other than the app's own updater rename a notarized app bundle. If the
+first run reports "Operation not permitted", allow "Update Cursor" under System Settings >
+Privacy & Security > App Management (needs admin) and run it again. Once Cursor lives in
+`~/Applications` the question goes away, because Cursor's own updater does the work.
+
 Machine-specific items (this keyboard, this desktop layout) live in `personal/open-items.md`,
 which git ignores.

@@ -13,6 +13,7 @@ wires up all of it; the permissions macOS reserves for a human are in `manual-st
 | [MesloLGS Nerd Font](#ghostty) | terminal font with prompt glyphs | `brew install --cask font-meslo-lg-nerd-font` | referenced by `ghostty/config` | nothing |
 | [GNU nano](#gnu-nano) | terminal editor with line numbers and colours | `brew install nano` | `nano/nanorc` | nothing |
 | [cliclick](#cliclick) | manual debugging only | `brew install cliclick` | none | Accessibility when run from Hammerspoon |
+| [Update Cursor](#update-cursor) | updates Cursor on an account without admin rights | `apply.sh`, built by `bin/build-update-cursor-app.sh` | `bin/cursor-update.sh` | admin rights for the moment of the swap, while Cursor lives in `/Applications` |
 
 ## Hammerspoon
 
@@ -136,6 +137,52 @@ pseudo-terminal bypasses Hammerspoon; in Ghostty it becomes cut).
 A command-line mouse and keyboard tool. The first versions of the window move used it; it is no
 longer used at runtime because its internal waits cost about 450 ms per call. Kept installed
 because it is handy for poking at the UI by hand.
+
+## Update Cursor
+
+**The problem.** Cursor updates itself with Squirrel (Electron's macOS updater). Squirrel installs
+silently only when it can write both `Cursor.app` *and the folder that holds it*. On a standard
+account `/Applications` is `root:admin` and not writable, so every update opens an
+authorization dialog. On a machine where admin rights come from a just-in-time elevation tool
+(Admin By Request and similar), that dialog shows up before the elevation is active and cannot
+be answered. And when an elevated update does go through, Squirrel's privileged installer
+leaves `Cursor.app` owned by root, so changing the owner alone fixes nothing: the folder is
+still the obstacle.
+
+**The button.** `~/Applications/Update Cursor.app` (Spotlight: "Update Cursor"). One click:
+
+1. Asks Cursor's own update feed (`api2.cursor.sh/updates`, the one Squirrel polls) for the
+   latest build. Already current: says so and stops.
+2. Offers **Update only** or **Update and move** (see below).
+3. Downloads the zip and refuses it unless the code signature is valid, the Team ID is
+   Cursor's developer (`VDXQ22DGB9`) and the bundle id is Cursor's.
+4. If admin rights are not active yet, waits: a dialog opens the elevation app and continues
+   once the account is back in the `admin` group.
+5. Quits Cursor (asking again if unsaved changes keep it open), swaps the bundle through the
+   standard macOS admin dialog, and reopens it. Only whole bundles are renamed, and the old one
+   is restored if the new one cannot be put in place.
+
+Run it with Cursor open: it runs detached, so it survives Cursor closing. Log:
+`~/Library/Logs/cursor-update.log`.
+
+**The permanent fix: Update and move.** Moving Cursor to `~/Applications`, which the user owns,
+removes the problem for good: Squirrel can then write the bundle and its folder, and Cursor's
+built-in updater installs every future version with no password. It is a one-time step that
+needs admin rights once (to take the bundle out of `/Applications`). Cursor keeps its settings,
+extensions and permissions, since none of those depend on where the bundle lives. A Dock icon
+that pointed at the old path may need dragging in again.
+
+From a terminal (not from Cursor's own terminal, which dies when Cursor quits):
+
+```bash
+bin/cursor-update.sh --check            # installed vs latest, where it lives, admin now or not
+bin/cursor-update.sh                    # update if there is a newer build
+bin/cursor-update.sh --move             # update if needed and move to ~/Applications
+bin/cursor-update.sh --force --dry-run  # download and verify only, touch nothing
+```
+
+The app carries its own copy of the script. After editing `bin/cursor-update.sh`, run
+`bin/build-update-cursor-app.sh` (or `apply.sh`) to rebuild it.
 
 ## Not installed on purpose
 
