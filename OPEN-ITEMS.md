@@ -49,5 +49,20 @@ Detail in `docs/macos-27-notes.md`, "Where to grab".
 it here. A verify-and-retry loop stays rejected: a failed retry inside a tab strip is
 destructive.
 
+## 4. Update Cursor: first real run
+
+**Status:** open since 2026-10-16.
+
+The first version broke Cursor (see the changelog); the rewrite passes its test suite and a
+dry run on the real machine. Still to confirm on the real machine:
+
+1. The first real run of the rewrite: one user-owned Cursor left in `~/Applications`, running,
+   with nothing left in `/Applications`. Root renaming whole notarized bundles was already seen
+   working on 2026-10-16; the rewrite does nothing else as root.
+2. Whether App Management also refuses deleting a launched bundle the user owns. If it does,
+   the run reports the leftover folder instead of deleting it; record the answer here.
+3. That Cursor's own updater installs the next release with no password. Only observable when
+   Cursor ships a new version.
+
 Machine-specific items (this keyboard, this desktop layout) live in `personal/open-items.md`,
 which git ignores.
