@@ -193,6 +193,20 @@ else
     warn "Hammerspoon is not running, start it and it will pick up the linked config"
 fi
 
+say "Apps opened at login"
+# System Events login items. Idempotent: an app already in the list is skipped.
+for app in "/Applications/Microsoft Outlook.app" "/Applications/Microsoft Teams.app"; do
+    name=$(basename "$app" .app)
+    if [ ! -d "$app" ]; then
+        warn "$name is not installed, skipped"
+    elif osascript -e 'tell application "System Events" to get the name of every login item' 2>/dev/null | tr ',' '\n' | sed 's/^ *//' | grep -qx "$name"; then
+        ok "$name already opens at login"
+    else
+        osascript -e "tell application \"System Events\" to make login item at end with properties {path:\"$app\", hidden:false}" >/dev/null \
+            && ok "$name now opens at login" || warn "could not add $name to the login items"
+    fi
+done
+
 cat <<'EOF'
 
 Done with everything that can be scripted.
