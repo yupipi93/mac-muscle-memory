@@ -268,6 +268,30 @@ Ways to stop a running command now:
 VS Code family editors are affected the same way: their embedded terminal cannot be told apart
 from the editor from outside the app.
 
+### Middle click pastes
+
+**Clicking the mouse wheel (button 2) pastes the clipboard**, in every app. Requested by the
+owner on 2026-11-09: "the same as Ctrl+V".
+
+`middleClickPasteTap` consumes the button 2 `otherMouseDown` and returns Cmd+V from inside the
+tap, the same mechanism as `clipboardTap`, so the paste reaches whatever holds keyboard focus.
+The matching `otherMouseUp` is consumed too, but only after a down the tap swallowed, so no
+app sees a lone mouse-up. Other extra buttons (back, forward) pass through untouched.
+
+It pastes at the **text cursor**, not under the pointer: it is exactly Cmd+V, not the X11
+primary selection.
+
+Cost: the middle click no longer opens a link in a new tab or closes a tab in browsers. To get
+that back in one app:
+
+```lua
+local MIDDLE_CLICK_PASSTHROUGH_APPS = { ["Google Chrome"] = true }
+```
+
+`MIDDLE_CLICK_PASTE_ENABLED = false` turns it off everywhere. Testing note: a synthetic click
+posted from `hs -c` must not wait with `hs.timer.usleep`, which blocks the same run loop the tap
+needs; chain `hs.timer.doAfter` instead.
+
 ## Screenshots
 
 **The Print Screen key crops the screen and copies it to the clipboard.** Ctrl+Cmd+Shift+4
