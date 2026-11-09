@@ -572,6 +572,48 @@ end)
 
 clipboardTap:start()
 
+-- Clic de la rueda del raton = pegar (Cmd+V), en todas las apps (2026-11-09).
+--
+-- Peticion explicita del usuario: que la rueda pegue el portapapeles igual que Ctrl+V. Pega
+-- donde esta el cursor de texto, no donde apunta el raton: es exactamente un Cmd+V.
+-- Precio: el clic central deja de abrir enlaces en pestana nueva y de cerrar pestanas en
+-- Chrome y similares. Para recuperarlo en una app, ponla en MIDDLE_CLICK_PASSTHROUGH_APPS:
+--   MIDDLE_CLICK_PASSTHROUGH_APPS = { ["Google Chrome"] = true }
+--
+-- Se consumen el down Y el up del boton 2: si el up pasara solo, algunas apps lo reciben sin su
+-- down y hacen cosas raras. El Cmd+V se devuelve desde la tap, como en clipboardTap, para que
+-- llegue a quien tiene el foco del teclado (Spotlight, dialogos de Guardar incluidos).
+local MIDDLE_CLICK_PASTE_ENABLED = true
+local MIDDLE_CLICK_PASSTHROUGH_APPS = {}
+local MIDDLE_BUTTON = 2
+local middleClickConsumed = false
+
+middleClickPasteTap = hs.eventtap.new({
+    hs.eventtap.event.types.otherMouseDown,
+    hs.eventtap.event.types.otherMouseUp,
+}, function(event)
+    if not MIDDLE_CLICK_PASTE_ENABLED then return false end
+    local button = event:getProperty(hs.eventtap.event.properties.mouseEventButtonNumber)
+    if button ~= MIDDLE_BUTTON then return false end
+
+    if event:getType() == hs.eventtap.event.types.otherMouseUp then
+        -- Solo se traga el up de un down que nos quedamos; si no, se deja pasar tal cual.
+        local consumed = middleClickConsumed
+        middleClickConsumed = false
+        return consumed
+    end
+
+    if next(MIDDLE_CLICK_PASSTHROUGH_APPS) then
+        local app = hs.application.frontmostApplication()
+        if app and MIDDLE_CLICK_PASSTHROUGH_APPS[app:name()] then return false end
+    end
+
+    middleClickConsumed = true
+    return true, keyEvents({ "cmd" }, "v")
+end)
+
+middleClickPasteTap:start()
+
 -- Borrar en Finder con Supr y Shift+Supr, como en Ubuntu (2026-09-24).
 --   Supr        -> mover a la Papelera        (Cmd+Retroceso en macOS)
 --   Shift+Supr  -> eliminar inmediatamente    (Option+Cmd+Retroceso), que pide confirmacion
@@ -776,7 +818,7 @@ dockScroll = {
 -- encender. Desde fuera parece que Ctrl+C "a veces" no funciona. Se revisan cada pocos
 -- segundos y se reactivan. Global para que el recolector de basura no se lleve el temporizador.
 tapWatchdog = hs.timer.doEvery(3, function()
-    for _, tap in ipairs({ clipboardTap, tileTap, finderDeleteTap, screenshotTap, dockScrollTap }) do
+    for _, tap in ipairs({ clipboardTap, middleClickPasteTap, tileTap, finderDeleteTap, screenshotTap, dockScrollTap }) do
         if not tap:isEnabled() then tap:start() end
     end
 end)
