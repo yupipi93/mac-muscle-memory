@@ -504,6 +504,15 @@ The macOS lock screen looks almost the same as the login window, user picture an
 field. That makes a lock easy to mistake for a logout. The way to tell: after unlocking, the
 apps are still running with the same process ids.
 
+## Apps opened at login
+
+Microsoft Outlook and Microsoft Teams open at login, as System Events login items (System
+Settings > General > Login Items > Open at Login). Both keep their local stores fresh only while
+they run, and the local readers that sit on those stores need them open. `bin/apply.sh` adds
+them when missing and skips them when present; it does not touch the other login items.
+
+Check: `osascript -e 'tell application "System Events" to get the name of every login item'`.
+
 ## Settings deliberately not applied
 
 | Setting | Why not |
