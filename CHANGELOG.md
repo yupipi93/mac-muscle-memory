@@ -88,6 +88,21 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-11-10, one clipboard: middle click, Ctrl+V and right-click Paste agree
+
+- **Bug fixed**: in Ghostty the middle click pasted an old selection instead of what had just
+  been copied with a Copy button. Two causes. The middle-click-to-Cmd+V tap (#3) was merged on
+  GitHub but never pulled into the checkout Hammerspoon loads, so Ghostty still handled the
+  click itself. And Ghostty middle-click pastes from its private selection pasteboard: measured
+  before the fix, it held a Dock command from weeks earlier while the clipboard held the
+  command just copied. Pulled and reloaded; `middleClickPasteTap` is running.
+- `copy-on-select = clipboard` in `ghostty/config`: a selection in Ghostty also lands on the
+  system clipboard, so there is one clipboard for every way of pasting.
+
+## 2026-11-09, middle click pastes the clipboard (#3)
+
+- `middleClickPasteTap`: a middle click is Cmd+V in every app. See `docs/settings.md`.
+
 ## 2026-10-08, Ctrl+C / Ctrl+V reach Spotlight and Save panels; middle-click paste removed
 
 - **Bug fixed**: the Ctrl remaps posted their Cmd replacement to the frontmost app's PID, so

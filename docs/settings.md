@@ -281,6 +281,14 @@ app sees a lone mouse-up. Other extra buttons (back, forward) pass through untou
 It pastes at the **text cursor**, not under the pointer: it is exactly Cmd+V, not the X11
 primary selection.
 
+**One clipboard, Ghostty included** (2026-11-10). Ghostty's own middle click pastes from a
+private selection pasteboard (`com.mitchellh.ghostty.selection`), which can hold a selection
+from weeks ago; Ghostty 1.3 has no option to point it at the system clipboard. The tap swallows
+the click, so Ghostty never sees it and pastes the system clipboard like everywhere else. In
+the other direction, `copy-on-select = clipboard` in `ghostty/config` puts a Ghostty selection
+on the system clipboard too. The checkout Hammerspoon loads (`~/.hammerspoon/init.lua` links to
+it) must be pulled after a merge on GitHub: until it was, the old Ghostty behaviour stayed.
+
 Cost: the middle click no longer opens a link in a new tab or closes a tab in browsers. To get
 that back in one app:
 

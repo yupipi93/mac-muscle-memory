@@ -90,6 +90,10 @@ instead, or bind `resize_split` to something else in `ghostty/config`.
 
 Font: MesloLGS Nerd Font Mono, 13 pt, so prompt themes that use Nerd Font glyphs render.
 
+One clipboard: selecting text copies it to the system clipboard (`copy-on-select = clipboard`),
+and the middle click is Cmd+V through Hammerspoon, so it never reads Ghostty's private selection
+pasteboard. See "Middle click pastes" in `docs/settings.md`.
+
 Ghostty on macOS also reads `~/Library/Application Support/com.mitchellh.ghostty/config`, and that
 file wins over the first. `apply.sh` moves it aside so the repo file is the only source of truth.
 
