@@ -15,6 +15,7 @@ workplace. The public docs stay generic; `personal/` is where your machine's spe
 | `machine.md` | your hardware, displays and their layout, installed software |
 | `keyboard.md` | your keyboard, and every remap stored in its firmware |
 | `notes.md` | backups you took, permissions you granted, constraints of your environment |
+| `hammerspoon/*.lua` | private Hammerspoon modules, loaded last by `hammerspoon/init.lua` |
 
 An agent working on this repo reads `personal/` when it exists, so it knows your machine
 without that knowledge ever reaching GitHub.

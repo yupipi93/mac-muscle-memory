@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-11
+
+### Added
+
+- Private Hammerspoon modules: `hammerspoon/init.lua` loads every `*.lua` in the gitignored
+  `personal/hammerspoon/` last, so machine-only items (a menu bar status for a work tool) stay
+  out of the public config. A failing module raises an alert and does not break the rest.
+
 ## 2026-09-22
 
 Initial setup. The session started as "make the mouse wheel scroll like Windows" and grew into

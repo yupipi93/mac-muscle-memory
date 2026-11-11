@@ -49,6 +49,11 @@ Provides:
   window to the adjacent desktop and
   follow it.
 - **Option+Shift+Left / Right** (Win+Shift on a Windows keyboard) move the focused window to the adjacent monitor.
+- **Private modules.** Every `*.lua` in `<repo>/personal/hammerspoon/` (gitignored) is loaded
+  last, in alphabetical order, for things that only make sense on this machine (own paths,
+  work tools). A module that fails raises an alert and is logged; the rest of the config keeps
+  running. `hs -c 'return hs.inspect(personalModules)'` shows what loaded. Template:
+  `personal.example/hammerspoon/README.md`.
 
 Tunables at the top of the file:
 
