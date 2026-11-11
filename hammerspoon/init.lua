@@ -540,15 +540,69 @@ end
 -- app en primer plano, y fallaba en todo lo que tiene el foco del teclado sin ser esa app:
 -- Spotlight (medido: Ctrl+C copio de Chrome, que estaba detras), los dialogos de Abrir y
 -- Guardar (son otro proceso) y los paneles flotantes como Raycast o 1Password.
+-- Copiar y cortar por el menu Edit en las apps donde Cmd+C / Cmd+X no llegan (2026-11-11).
+--
+-- En Cursor, con el foco dentro de un webview (el cuadro del prompt de Claude Code, por ejemplo),
+-- Cmd+C y Cmd+X no hacen nada: el portapapeles no cambia. Medido con "Developer: Toggle Keyboard
+-- Shortcuts Troubleshooting": Cmd+A llega al servicio de atajos de Cursor y Cmd+C ni aparece.
+-- Cmd+V si funciona. Pulsar Edit > Copy en el menu hace la copia nativa de Electron y funciona
+-- en el webview, en el editor y en el terminal. Asi que en estas apps, en vez de enviar la
+-- tecla, se pulsa el menu. Vale para Ctrl+C (lo de arriba) y tambien para el Cmd+C nativo.
+--
+-- Solo si el foco del teclado es de esa app: con Spotlight o un dialogo de Guardar abiertos
+-- encima, Cursor sigue siendo la app de delante, pero la copia es de ellos.
+local MENU_CLIPBOARD_APPS = {
+    ["Cursor"] = { c = { "Edit", "Copy" }, x = { "Edit", "Cut" } },
+}
+local menuClipboardAX = hs.axuielement.systemWideElement()
+menuClipboardAX:setTimeout(0.2)
+
+-- Devuelve la app y la ruta del menu si la tecla (letra "c" o "x") va por el menu.
+local function menuClipboardTarget(letter)
+    local app = hs.application.frontmostApplication()
+    local paths = app and MENU_CLIPBOARD_APPS[app:name()]
+    local path = paths and paths[letter]
+    if not path then return nil end
+    -- Cursor (Electron) a menudo no contesta a AXFocusedApplication (devuelve nil, medido): sin
+    -- respuesta se da por buena la app de delante. Solo se descarta el menu si el foco es,
+    -- con seguridad, de otro proceso.
+    local ok, focused = pcall(function() return menuClipboardAX:attributeValue("AXFocusedApplication") end)
+    if ok and focused and focused:pid() ~= app:pid() then return nil end
+    return app, path
+end
+
+-- Pulsa el menu fuera de la tap: una llamada de Accessibility dentro del callback puede
+-- tardar lo bastante como para que macOS desactive la tap.
+local function pressMenuLater(app, path)
+    hs.timer.doAfter(0, function() app:selectMenuItem(path) end)
+end
+
+local menuClipboardLetters = {
+    [hs.keycodes.map.c] = "c",
+    [hs.keycodes.map.x] = "x",
+}
+
 clipboardTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
     if not CLIPBOARD_REMAP_ENABLED then return false end
+
+    local flags = event:getFlags()
+
+    -- Cmd+C / Cmd+X nativos (Alt+C / Alt+X en un teclado de Windows en modo Mac).
+    local letter = menuClipboardLetters[event:getKeyCode()]
+    if letter and flags.cmd and not (flags.ctrl or flags.alt or flags.shift or flags.fn) then
+        local app, path = menuClipboardTarget(letter)
+        if app then
+            pressMenuLater(app, path)
+            return true
+        end
+        return false
+    end
 
     local entry = clipboardShortcuts[event:getKeyCode()]
     if not entry then return false end
 
     -- Ctrl, o Ctrl+Shift. Con Cmd, Alt o Fn encima es otro atajo distinto y no nos corresponde
     -- (salvo fn en las flechas, que siempre la llevan).
-    local flags = event:getFlags()
     local fnMatters = not arrowKeyCodes[event:getKeyCode()]
     if not flags.ctrl or flags.cmd or flags.alt or (fnMatters and flags.fn) then return false end
 
@@ -566,6 +620,13 @@ clipboardTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(eve
     end
     if type(action) == "table" then
         return true, keyEvents(action[1], action[2])
+    end
+    if action == "c" or action == "x" then
+        local app, path = menuClipboardTarget(action)
+        if app then
+            pressMenuLater(app, path)
+            return true
+        end
     end
     return true, keyEvents({ "cmd" }, action)
 end)

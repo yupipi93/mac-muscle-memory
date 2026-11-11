@@ -88,6 +88,18 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-11-11, copy and cut in Cursor webviews (Claude Code prompt)
+
+- **Bug fixed**: in Cursor, Ctrl+C / Ctrl+X (and the native Cmd+C / Cmd+X) did nothing inside a
+  webview such as the Claude Code prompt: the clipboard did not change. Paste worked. With
+  "Developer: Toggle Keyboard Shortcuts Troubleshooting" on, Cmd+A reached Cursor's keybinding
+  service and Cmd+C never appeared; clicking Edit > Copy did copy. `clipboardTap` now presses
+  Edit > Copy / Edit > Cut for the apps in `MENU_CLIPBOARD_APPS` (only Cursor) instead of sending
+  the key, unless another process (Spotlight, a Save panel) clearly holds the keyboard.
+  Verified in Cursor: Claude Code prompt (Ctrl+C, Cmd+C, Ctrl+X then Ctrl+V), code editor (select
+  all, and the whole line with an empty selection), integrated terminal (mouse selection and
+  Ctrl+A).
+
 ## 2026-11-11, middle click closes Chrome tabs again
 
 - **Bug fixed**: since the middle click became Cmd+V (#3), it no longer closed a tab in Chrome.

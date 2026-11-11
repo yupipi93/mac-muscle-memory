@@ -173,6 +173,23 @@ terminal option) holds secure input, no event tap sees the keyboard, so Ctrl+C r
 as Ctrl+C. Nothing can work around that. Check it with
 `hs -c 'return hs.eventtap.isSecureInputEnabled()'`.
 
+**Copy and cut through the Edit menu in Cursor** (2026-11-11). Inside a Cursor webview (the
+Claude Code prompt, for one) a Cmd+C or Cmd+X keystroke copies nothing, synthetic or not, while
+Cmd+V pastes. The keybinding troubleshooting log shows Cmd+A arriving and Cmd+C never reaching
+the keybinding service. Clicking Edit > Copy does a native Electron copy and works there, in the
+code editor and in the terminal. So for the apps in `MENU_CLIPBOARD_APPS` (only Cursor) the tap
+consumes Ctrl+C / Ctrl+X, and the native Cmd+C / Cmd+X too, and presses the menu item from a
+`hs.timer.doAfter(0)` so the Accessibility call never slows the tap. It falls back to the
+keystroke when `AXFocusedApplication` names another process (Spotlight, a Save panel). Cursor
+often answers that attribute with nil; nil counts as "the frontmost app".
+
+| Where (Cursor) | Keys | Result |
+|----------------|------|--------|
+| Claude Code prompt | Ctrl+A, Ctrl+C / Cmd+C | clipboard = prompt text (before: unchanged) |
+| Claude Code prompt | Ctrl+A, Ctrl+X, Ctrl+V | text cut, then pasted back |
+| Code editor | Ctrl+A, Ctrl+C; Ctrl+C with no selection | both lines; the current line |
+| Integrated terminal | mouse selection, Ctrl+C; Ctrl+A, Ctrl+C | the selection; the whole buffer |
+
 ### Undo, and paste without formatting
 
 Added 2026-09-23:
