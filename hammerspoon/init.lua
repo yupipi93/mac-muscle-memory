@@ -920,3 +920,26 @@ if not hs.fs.attributes(SPACESWITCH) then
 else
     hs.alert.show("Hammerspoon: scroll sobre el Dock cambia de escritorio")
 end
+
+-- Modulos privados opcionales: cada *.lua de <repo>/personal/hammerspoon/ (en .gitignore) se
+-- carga al final, en orden alfabetico, para lo que es solo de esta maquina (rutas propias,
+-- herramientas del trabajo). Un modulo que falla se avisa y no tumba el resto de la config.
+personalModules = {}
+if REPO then
+    local dir = REPO .. "/personal/hammerspoon"
+    if hs.fs.attributes(dir, "mode") == "directory" then
+        local files = {}
+        for f in hs.fs.dir(dir) do
+            if f:match("^[^.].*%.lua$") then table.insert(files, f) end
+        end
+        table.sort(files)
+        for _, f in ipairs(files) do
+            local ok, err = pcall(dofile, dir .. "/" .. f)
+            personalModules[f] = ok and "loaded" or tostring(err)
+            if not ok then
+                print("personal/hammerspoon/" .. f .. ": " .. tostring(err))
+                hs.alert.show("personal/hammerspoon/" .. f .. " no carga: mira la consola")
+            end
+        end
+    end
+end
