@@ -88,6 +88,16 @@ have moved, one canvas per display, tunable via `HINT_DURATION` and `HINT_ALPHA`
 draw it, its speed is ours to choose, unlike the native animation. Measured cost: none, the
 switch still medians 130 ms.
 
+## 2026-11-11, middle click closes Chrome tabs again
+
+- **Bug fixed**: since the middle click became Cmd+V (#3), it no longer closed a tab in Chrome.
+  `middleClickPasteTap` now lets the click through when the pointer is on a browser's tab strip
+  (`MIDDLE_CLICK_TAB_STRIP_APPS`, Chrome: the top 41 px of the window under the pointer) and
+  pastes everywhere else. Accessibility cannot identify a tab (Chrome reports the strip as
+  untitled `AXGroup`s), so it reads only the app and window under the pointer and compares the
+  height. Measured: 1 to 6 ms per click; true on the strip, false on the address bar, the page
+  and other apps.
+
 ## 2026-11-10, one clipboard: middle click, Ctrl+V and right-click Paste agree
 
 - **Bug fixed**: in Ghostty the middle click pasted an old selection instead of what had just

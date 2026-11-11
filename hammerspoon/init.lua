@@ -576,8 +576,9 @@ clipboardTap:start()
 --
 -- Peticion explicita del usuario: que la rueda pegue el portapapeles igual que Ctrl+V. Pega
 -- donde esta el cursor de texto, no donde apunta el raton: es exactamente un Cmd+V.
--- Precio: el clic central deja de abrir enlaces en pestana nueva y de cerrar pestanas en
--- Chrome y similares. Para recuperarlo en una app, ponla en MIDDLE_CLICK_PASSTHROUGH_APPS:
+-- Precio: el clic central deja de abrir enlaces en pestana nueva (cerrar pestanas sigue
+-- funcionando, ver MIDDLE_CLICK_TAB_STRIP_APPS). Para devolverle a una app entera su clic
+-- central, ponla en MIDDLE_CLICK_PASSTHROUGH_APPS:
 --   MIDDLE_CLICK_PASSTHROUGH_APPS = { ["Google Chrome"] = true }
 --
 -- Se consumen el down Y el up del boton 2: si el up pasara solo, algunas apps lo reciben sin su
@@ -587,6 +588,31 @@ local MIDDLE_CLICK_PASTE_ENABLED = true
 local MIDDLE_CLICK_PASSTHROUGH_APPS = {}
 local MIDDLE_BUTTON = 2
 local middleClickConsumed = false
+
+-- Excepcion (2026-11-11): sobre la barra de pestanas de un navegador el clic central sigue
+-- siendo el suyo (cerrar la pestana), y en el resto de la ventana pega. Accessibility no sirve
+-- para reconocer una pestana: en Chrome la barra son AXGroup sin rol ni titulo. Lo fiable es la
+-- geometria: la barra de pestanas ocupa los primeros N px de la ventana (Chrome: 41, medido).
+-- Se mira la ventana que hay BAJO el puntero, no la de delante, porque el clic central cierra
+-- tambien pestanas de una ventana de Chrome que esta detras.
+local MIDDLE_CLICK_TAB_STRIP_APPS = { ["Google Chrome"] = 41 }
+local middleClickAX = hs.axuielement.systemWideElement()
+middleClickAX:setTimeout(0.2)
+
+local function overBrowserTabStrip(pt)
+    local ok, result = pcall(function()
+        local el = middleClickAX:elementAtPosition(pt.x, pt.y)
+        if not el then return false end
+        local app = hs.application.applicationForPID(el:pid())
+        local strip = app and MIDDLE_CLICK_TAB_STRIP_APPS[app:name()]
+        if not strip then return false end
+        local win = el:attributeValue("AXWindow")
+        local pos = win and win:attributeValue("AXPosition")
+        if not pos then return false end
+        return pt.y - pos.y < strip
+    end)
+    return ok and result
+end
 
 middleClickPasteTap = hs.eventtap.new({
     hs.eventtap.event.types.otherMouseDown,
@@ -607,6 +633,8 @@ middleClickPasteTap = hs.eventtap.new({
         local app = hs.application.frontmostApplication()
         if app and MIDDLE_CLICK_PASSTHROUGH_APPS[app:name()] then return false end
     end
+
+    if overBrowserTabStrip(event:location()) then return false end
 
     middleClickConsumed = true
     return true, keyEvents({ "cmd" }, "v")
@@ -811,6 +839,7 @@ dockScroll = {
     grabPoint = grabPoint,
     moveScreen = moveWindowToScreen,
     overDock = mouseOverDock,
+    overTabStrip = overBrowserTabStrip,
     zone = dockZone,
 }
 

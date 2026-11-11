@@ -289,8 +289,17 @@ the other direction, `copy-on-select = clipboard` in `ghostty/config` puts a Gho
 on the system clipboard too. The checkout Hammerspoon loads (`~/.hammerspoon/init.lua` links to
 it) must be pulled after a merge on GitHub: until it was, the old Ghostty behaviour stayed.
 
-Cost: the middle click no longer opens a link in a new tab or closes a tab in browsers. To get
-that back in one app:
+**Except on a browser's tab strip** (2026-11-11): there the click passes through, so a middle
+click still closes a tab. `MIDDLE_CLICK_TAB_STRIP_APPS` maps an app name to its tab strip
+height (`["Google Chrome"] = 41`, measured). The tap asks Accessibility for the element under
+the pointer only to learn its app and window (Chrome reports the strip as untitled `AXGroup`s,
+so a tab cannot be recognised by role), then compares the pointer with the window top. It uses
+the window under the pointer, not the frontmost one, so a tab in a Chrome window behind
+another closes too. The query has a 0.2 s Accessibility timeout and takes 1 to 6 ms. In
+full-screen Chrome the top 41 px pass through even while the strip is hidden.
+
+Cost: elsewhere in the page the middle click pastes, so it no longer opens a link in a new tab.
+To give a whole app its own middle click back:
 
 ```lua
 local MIDDLE_CLICK_PASSTHROUGH_APPS = { ["Google Chrome"] = true }
