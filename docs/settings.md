@@ -42,9 +42,10 @@ Config source of truth: `hammerspoon/init.lua` in this repo, symlinked to
 
 Provides:
 
-- **Scroll over the Dock to change desktop.** Wheel up goes to the previous desktop, wheel
-  down to the next, matching the Ubuntu behaviour the user is used to. The event is consumed
-  so macOS does not also fire its own App Expose.
+- **Scroll over the Dock to change desktop, off by default since 2026-11-12.** With
+  `DOCK_SCROLL_ENABLED = true`, wheel up goes to the previous desktop and wheel down to the
+  next, matching the Ubuntu behaviour. The event is consumed so macOS does not also fire its
+  own App Expose. Off, no scroll tap exists and the wheel is stock (see "Mouse wheel").
 - **Ctrl+Cmd+Shift+Left / Right** (Ctrl+Shift+Left / Right until 2026-09-24) move the focused
   window to the adjacent desktop and
   follow it.
@@ -59,7 +60,8 @@ Tunables at the top of the file:
 
 | Constant | Default | Meaning |
 |----------|---------|---------|
-| `SCROLL_INVERT` | `false` | Flip if the scroll direction feels backwards |
+| `DOCK_SCROLL_ENABLED` | `false` | Scroll over the Dock to change desktop. Off so the mouse wheel stays stock. |
+| `SCROLL_INVERT` | `false` | Flip if the Dock scroll direction feels backwards |
 | `SCROLL_COOLDOWN` | `0.28` | Minimum seconds between desktop changes. One wheel notch emits several events, so without this it would skip several desktops. |
 | `DOCK_FALLBACK_STRIP` | `6` | Height in px of the hot zone when the Dock is set to auto-hide and therefore reserves no screen space |
 | `HINT_ENABLED` | `true` | Draws a directional sweep on every desktop change. Set to `false` for a bare instant switch. |
@@ -290,46 +292,14 @@ Ways to stop a running command now:
 VS Code family editors are affected the same way: their embedded terminal cannot be told apart
 from the editor from outside the app.
 
-### Middle click pastes
+### Mouse wheel
 
-**Clicking the mouse wheel (button 2) pastes the clipboard**, in every app. Requested by the
-owner on 2026-11-09: "the same as Ctrl+V".
-
-`middleClickPasteTap` consumes the button 2 `otherMouseDown` and returns Cmd+V from inside the
-tap, the same mechanism as `clipboardTap`, so the paste reaches whatever holds keyboard focus.
-The matching `otherMouseUp` is consumed too, but only after a down the tap swallowed, so no
-app sees a lone mouse-up. Other extra buttons (back, forward) pass through untouched.
-
-It pastes at the **text cursor**, not under the pointer: it is exactly Cmd+V, not the X11
-primary selection.
-
-**One clipboard, Ghostty included** (2026-11-10). Ghostty's own middle click pastes from a
-private selection pasteboard (`com.mitchellh.ghostty.selection`), which can hold a selection
-from weeks ago; Ghostty 1.3 has no option to point it at the system clipboard. The tap swallows
-the click, so Ghostty never sees it and pastes the system clipboard like everywhere else. In
-the other direction, `copy-on-select = clipboard` in `ghostty/config` puts a Ghostty selection
-on the system clipboard too. The checkout Hammerspoon loads (`~/.hammerspoon/init.lua` links to
-it) must be pulled after a merge on GitHub: until it was, the old Ghostty behaviour stayed.
-
-**Except on a browser's tab strip** (2026-11-11): there the click passes through, so a middle
-click still closes a tab. `MIDDLE_CLICK_TAB_STRIP_APPS` maps an app name to its tab strip
-height (`["Google Chrome"] = 41`, measured). The tap asks Accessibility for the element under
-the pointer only to learn its app and window (Chrome reports the strip as untitled `AXGroup`s,
-so a tab cannot be recognised by role), then compares the pointer with the window top. It uses
-the window under the pointer, not the frontmost one, so a tab in a Chrome window behind
-another closes too. The query has a 0.2 s Accessibility timeout and takes 1 to 6 ms. In
-full-screen Chrome the top 41 px pass through even while the strip is hidden.
-
-Cost: elsewhere in the page the middle click pastes, so it no longer opens a link in a new tab.
-To give a whole app its own middle click back:
-
-```lua
-local MIDDLE_CLICK_PASSTHROUGH_APPS = { ["Google Chrome"] = true }
-```
-
-`MIDDLE_CLICK_PASTE_ENABLED = false` turns it off everywhere. Testing note: a synthetic click
-posted from `hs -c` must not wait with `hs.timer.usleep`, which blocks the same run loop the tap
-needs; chain `hs.timer.doAfter` instead.
+**The mouse wheel is stock macOS** (2026-11-12). The owner asked for no custom wheel behaviour
+after the middle-click paste (2026-11-09 to 2026-11-12) cost the middle click in too many apps:
+opening links in a new tab, Ghostty's selection paste, app-specific actions. Nothing in
+Hammerspoon listens to `otherMouseDown` or `scrollWheel` while `DOCK_SCROLL_ENABLED` is
+`false`; `bin/capture.sh` shows the Dock tap as `off`. The one wheel setting left is the scroll
+direction (`com.apple.swipescrolldirection`, above), which the owner set in System Settings.
 
 ## Screenshots
 

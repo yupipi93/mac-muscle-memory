@@ -1,6 +1,10 @@
 require("hs.ipc")
 
--- Ajustes rapidos: si el scroll cambia de escritorio al reves, pon SCROLL_INVERT = true.
+-- Ajustes rapidos. La rueda del raton se queda como la trae macOS (2026-11-12, peticion del
+-- usuario): ni pegar con el clic central ni scroll sobre el Dock. Para volver a cambiar de
+-- escritorio con la rueda encima del Dock, pon DOCK_SCROLL_ENABLED = true; si cambia al
+-- reves, SCROLL_INVERT = true.
+local DOCK_SCROLL_ENABLED = false
 local SCROLL_INVERT = false
 local SCROLL_COOLDOWN = 0.28
 local DOCK_FALLBACK_STRIP = 6
@@ -633,76 +637,6 @@ end)
 
 clipboardTap:start()
 
--- Clic de la rueda del raton = pegar (Cmd+V), en todas las apps (2026-11-09).
---
--- Peticion explicita del usuario: que la rueda pegue el portapapeles igual que Ctrl+V. Pega
--- donde esta el cursor de texto, no donde apunta el raton: es exactamente un Cmd+V.
--- Precio: el clic central deja de abrir enlaces en pestana nueva (cerrar pestanas sigue
--- funcionando, ver MIDDLE_CLICK_TAB_STRIP_APPS). Para devolverle a una app entera su clic
--- central, ponla en MIDDLE_CLICK_PASSTHROUGH_APPS:
---   MIDDLE_CLICK_PASSTHROUGH_APPS = { ["Google Chrome"] = true }
---
--- Se consumen el down Y el up del boton 2: si el up pasara solo, algunas apps lo reciben sin su
--- down y hacen cosas raras. El Cmd+V se devuelve desde la tap, como en clipboardTap, para que
--- llegue a quien tiene el foco del teclado (Spotlight, dialogos de Guardar incluidos).
-local MIDDLE_CLICK_PASTE_ENABLED = true
-local MIDDLE_CLICK_PASSTHROUGH_APPS = {}
-local MIDDLE_BUTTON = 2
-local middleClickConsumed = false
-
--- Excepcion (2026-11-11): sobre la barra de pestanas de un navegador el clic central sigue
--- siendo el suyo (cerrar la pestana), y en el resto de la ventana pega. Accessibility no sirve
--- para reconocer una pestana: en Chrome la barra son AXGroup sin rol ni titulo. Lo fiable es la
--- geometria: la barra de pestanas ocupa los primeros N px de la ventana (Chrome: 41, medido).
--- Se mira la ventana que hay BAJO el puntero, no la de delante, porque el clic central cierra
--- tambien pestanas de una ventana de Chrome que esta detras.
-local MIDDLE_CLICK_TAB_STRIP_APPS = { ["Google Chrome"] = 41 }
-local middleClickAX = hs.axuielement.systemWideElement()
-middleClickAX:setTimeout(0.2)
-
-local function overBrowserTabStrip(pt)
-    local ok, result = pcall(function()
-        local el = middleClickAX:elementAtPosition(pt.x, pt.y)
-        if not el then return false end
-        local app = hs.application.applicationForPID(el:pid())
-        local strip = app and MIDDLE_CLICK_TAB_STRIP_APPS[app:name()]
-        if not strip then return false end
-        local win = el:attributeValue("AXWindow")
-        local pos = win and win:attributeValue("AXPosition")
-        if not pos then return false end
-        return pt.y - pos.y < strip
-    end)
-    return ok and result
-end
-
-middleClickPasteTap = hs.eventtap.new({
-    hs.eventtap.event.types.otherMouseDown,
-    hs.eventtap.event.types.otherMouseUp,
-}, function(event)
-    if not MIDDLE_CLICK_PASTE_ENABLED then return false end
-    local button = event:getProperty(hs.eventtap.event.properties.mouseEventButtonNumber)
-    if button ~= MIDDLE_BUTTON then return false end
-
-    if event:getType() == hs.eventtap.event.types.otherMouseUp then
-        -- Solo se traga el up de un down que nos quedamos; si no, se deja pasar tal cual.
-        local consumed = middleClickConsumed
-        middleClickConsumed = false
-        return consumed
-    end
-
-    if next(MIDDLE_CLICK_PASSTHROUGH_APPS) then
-        local app = hs.application.frontmostApplication()
-        if app and MIDDLE_CLICK_PASSTHROUGH_APPS[app:name()] then return false end
-    end
-
-    if overBrowserTabStrip(event:location()) then return false end
-
-    middleClickConsumed = true
-    return true, keyEvents({ "cmd" }, "v")
-end)
-
-middleClickPasteTap:start()
-
 -- Borrar en Finder con Supr y Shift+Supr, como en Ubuntu (2026-09-24).
 --   Supr        -> mover a la Papelera        (Cmd+Retroceso en macOS)
 --   Shift+Supr  -> eliminar inmediatamente    (Option+Cmd+Retroceso), que pide confirmacion
@@ -832,6 +766,7 @@ end)
 screenshotTap:start()
 
 -- Cambiar de escritorio haciendo scroll con el raton encima del Dock (estilo Ubuntu).
+-- Apagado por defecto desde 2026-11-12 (DOCK_SCROLL_ENABLED): sin la tap, la rueda no se toca.
 
 local dockAutohide = hs.execute("defaults read com.apple.dock autohide 2>/dev/null"):match("1") ~= nil
 
@@ -864,7 +799,7 @@ end
 
 local lastSwitch = 0
 
-dockScrollTap = hs.eventtap.new({ hs.eventtap.event.types.scrollWheel }, function(event)
+dockScrollTap = DOCK_SCROLL_ENABLED and hs.eventtap.new({ hs.eventtap.event.types.scrollWheel }, function(event)
     if not mouseOverDock() then return false end
 
     local delta = event:getProperty(hs.eventtap.event.properties.scrollWheelEventDeltaAxis1)
@@ -882,9 +817,9 @@ dockScrollTap = hs.eventtap.new({ hs.eventtap.event.types.scrollWheel }, functio
     pressSpaceShortcut(direction)
 
     return true
-end)
+end) or nil
 
-dockScrollTap:start()
+if dockScrollTap then dockScrollTap:start() end
 
 -- Expuesto para probar desde la terminal: hs -c "dockScroll.switch(1)"
 dockScroll = {
@@ -900,7 +835,6 @@ dockScroll = {
     grabPoint = grabPoint,
     moveScreen = moveWindowToScreen,
     overDock = mouseOverDock,
-    overTabStrip = overBrowserTabStrip,
     zone = dockZone,
 }
 
@@ -908,7 +842,7 @@ dockScroll = {
 -- encender. Desde fuera parece que Ctrl+C "a veces" no funciona. Se revisan cada pocos
 -- segundos y se reactivan. Global para que el recolector de basura no se lleve el temporizador.
 tapWatchdog = hs.timer.doEvery(3, function()
-    for _, tap in ipairs({ clipboardTap, middleClickPasteTap, tileTap, finderDeleteTap, screenshotTap, dockScrollTap }) do
+    for _, tap in pairs({ clipboardTap, tileTap, finderDeleteTap, screenshotTap, dockScrollTap }) do
         if not tap:isEnabled() then tap:start() end
     end
 end)
@@ -918,7 +852,8 @@ end)
 if not hs.fs.attributes(SPACESWITCH) then
     hs.alert.show("Falta helper/spaceswitch: ejecuta bin/apply.sh del repo")
 else
-    hs.alert.show("Hammerspoon: scroll sobre el Dock cambia de escritorio")
+    hs.alert.show(DOCK_SCROLL_ENABLED and "Hammerspoon: scroll sobre el Dock cambia de escritorio"
+        or "Hammerspoon cargado")
 end
 
 -- Modulos privados opcionales: cada *.lua de <repo>/personal/hammerspoon/ (en .gitignore) se

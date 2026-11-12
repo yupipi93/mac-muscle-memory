@@ -33,7 +33,7 @@ This cannot be scripted: the domain is protected and `defaults write` fails with
 
 ## 3. Create the desktops
 
-The scroll gesture is useless with a single desktop. Press F3 for Mission Control and use the
+Switching desktops is useless with a single desktop. Press F3 for Mission Control and use the
 `+` button at the top right to add as many as you want.
 
 Desktops cannot be created programmatically here, because that path goes through the same

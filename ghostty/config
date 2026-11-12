@@ -15,8 +15,8 @@ keybind = ctrl+minus=decrease_font_size:1
 keybind = ctrl+zero=reset_font_size
 
 # One clipboard. By default a selection goes only to Ghostty's private selection pasteboard.
-# `clipboard` copies it to the system clipboard too, so selecting and then Ctrl+V, the
-# right-click Paste or the middle click (Cmd+V via Hammerspoon) all paste the same thing.
+# `clipboard` copies it to the system clipboard too, so selecting and then Ctrl+V or the
+# right-click Paste paste the same thing. The middle click is Ghostty's own (stock).
 # Applies after a config reload.
 copy-on-select = clipboard
 
