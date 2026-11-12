@@ -9,8 +9,8 @@
 
 ### Changed
 
-- Scroll over the Dock to change desktop is off by default (`DOCK_SCROLL_ENABLED = false`), so
-  nothing custom touches the wheel. Set it to `true` to bring it back.
+- Scroll over the Dock to change desktop sits behind `DOCK_SCROLL_ENABLED`. It was briefly off
+  (#7) and is on again (#8): it is the one custom wheel behaviour the owner keeps.
 
 ## 2026-11-11
 
