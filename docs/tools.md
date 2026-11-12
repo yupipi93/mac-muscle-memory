@@ -22,7 +22,7 @@ repo file and reloading Hammerspoon is the whole workflow.
 
 What it provides, each explained in `settings.md`:
 
-- Scroll over the Dock to change desktop.
+- Scroll over the Dock to change desktop, off by default (`DOCK_SCROLL_ENABLED`).
 - Ctrl+Cmd+Shift+Arrow to take a window to the next desktop, Option+Shift+Arrow (Win+Shift) to the next monitor.
 - Ctrl+C / X / V / Z / A, Ctrl+Shift+V, Ctrl+Arrow and Ctrl+Shift+Arrow in every app.
 - Print Screen crops, saves and copies. Delete and Shift+Delete in Finder.
@@ -90,9 +90,8 @@ instead, or bind `resize_split` to something else in `ghostty/config`.
 
 Font: MesloLGS Nerd Font Mono, 13 pt, so prompt themes that use Nerd Font glyphs render.
 
-One clipboard: selecting text copies it to the system clipboard (`copy-on-select = clipboard`),
-and the middle click is Cmd+V through Hammerspoon, so it never reads Ghostty's private selection
-pasteboard. See "Middle click pastes" in `docs/settings.md`.
+Selecting text copies it to the system clipboard too (`copy-on-select = clipboard`). The middle
+click is Ghostty's own: it pastes Ghostty's selection. See "Mouse wheel" in `docs/settings.md`.
 
 Ghostty on macOS also reads `~/Library/Application Support/com.mitchellh.ghostty/config`, and that
 file wins over the first. `apply.sh` moves it aside so the repo file is the only source of truth.

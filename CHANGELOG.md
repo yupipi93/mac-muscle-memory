@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-12
+
+### Removed
+
+- Middle click pastes (#3, #4): the owner wants the mouse wheel stock. The middle click is
+  each app's own again (open a link in a new tab, close a tab, Ghostty's selection paste).
+
+### Changed
+
+- Scroll over the Dock to change desktop is off by default (`DOCK_SCROLL_ENABLED = false`), so
+  nothing custom touches the wheel. Set it to `true` to bring it back.
+
 ## 2026-11-11
 
 ### Added
