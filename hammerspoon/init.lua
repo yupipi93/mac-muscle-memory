@@ -1,10 +1,9 @@
 require("hs.ipc")
 
--- Ajustes rapidos. La rueda del raton se queda como la trae macOS (2026-11-12, peticion del
--- usuario): ni pegar con el clic central ni scroll sobre el Dock. Para volver a cambiar de
--- escritorio con la rueda encima del Dock, pon DOCK_SCROLL_ENABLED = true; si cambia al
--- reves, SCROLL_INVERT = true.
-local DOCK_SCROLL_ENABLED = false
+-- Ajustes rapidos. De la rueda del raton solo se toca el scroll encima del Dock, que cambia de
+-- escritorio (DOCK_SCROLL_ENABLED; si cambia al reves, SCROLL_INVERT = true). El clic central
+-- es el de cada app desde 2026-11-12, peticion del usuario: no lo remapees.
+local DOCK_SCROLL_ENABLED = true
 local SCROLL_INVERT = false
 local SCROLL_COOLDOWN = 0.28
 local DOCK_FALLBACK_STRIP = 6
@@ -766,7 +765,7 @@ end)
 screenshotTap:start()
 
 -- Cambiar de escritorio haciendo scroll con el raton encima del Dock (estilo Ubuntu).
--- Apagado por defecto desde 2026-11-12 (DOCK_SCROLL_ENABLED): sin la tap, la rueda no se toca.
+-- Con DOCK_SCROLL_ENABLED = false no se crea la tap y la rueda queda como la trae macOS.
 
 local dockAutohide = hs.execute("defaults read com.apple.dock autohide 2>/dev/null"):match("1") ~= nil
 

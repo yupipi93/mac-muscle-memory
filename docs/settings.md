@@ -42,10 +42,10 @@ Config source of truth: `hammerspoon/init.lua` in this repo, symlinked to
 
 Provides:
 
-- **Scroll over the Dock to change desktop, off by default since 2026-11-12.** With
-  `DOCK_SCROLL_ENABLED = true`, wheel up goes to the previous desktop and wheel down to the
-  next, matching the Ubuntu behaviour. The event is consumed so macOS does not also fire its
-  own App Expose. Off, no scroll tap exists and the wheel is stock (see "Mouse wheel").
+- **Scroll over the Dock to change desktop.** Wheel up goes to the previous desktop, wheel
+  down to the next, matching the Ubuntu behaviour the user is used to. The event is consumed
+  so macOS does not also fire its own App Expose. `DOCK_SCROLL_ENABLED = false` removes the
+  tap and leaves the wheel stock.
 - **Ctrl+Cmd+Shift+Left / Right** (Ctrl+Shift+Left / Right until 2026-09-24) move the focused
   window to the adjacent desktop and
   follow it.
@@ -60,7 +60,7 @@ Tunables at the top of the file:
 
 | Constant | Default | Meaning |
 |----------|---------|---------|
-| `DOCK_SCROLL_ENABLED` | `false` | Scroll over the Dock to change desktop. Off so the mouse wheel stays stock. |
+| `DOCK_SCROLL_ENABLED` | `true` | Scroll over the Dock to change desktop. `false` leaves the mouse wheel stock. |
 | `SCROLL_INVERT` | `false` | Flip if the Dock scroll direction feels backwards |
 | `SCROLL_COOLDOWN` | `0.28` | Minimum seconds between desktop changes. One wheel notch emits several events, so without this it would skip several desktops. |
 | `DOCK_FALLBACK_STRIP` | `6` | Height in px of the hot zone when the Dock is set to auto-hide and therefore reserves no screen space |
@@ -294,12 +294,12 @@ from the editor from outside the app.
 
 ### Mouse wheel
 
-**The mouse wheel is stock macOS** (2026-11-12). The owner asked for no custom wheel behaviour
-after the middle-click paste (2026-11-09 to 2026-11-12) cost the middle click in too many apps:
-opening links in a new tab, Ghostty's selection paste, app-specific actions. Nothing in
-Hammerspoon listens to `otherMouseDown` or `scrollWheel` while `DOCK_SCROLL_ENABLED` is
-`false`; `bin/capture.sh` shows the Dock tap as `off`. The one wheel setting left is the scroll
-direction (`com.apple.swipescrolldirection`, above), which the owner set in System Settings.
+**The middle click is stock macOS** (2026-11-12). The middle-click paste (2026-11-09 to
+2026-11-12) cost the middle click in too many apps: opening links in a new tab, Ghostty's
+selection paste, app-specific actions. Nothing in Hammerspoon listens to `otherMouseDown`; do
+not remap it again. The only custom wheel behaviour the owner keeps is the scroll over the Dock
+to change desktop (above). The scroll direction (`com.apple.swipescrolldirection`) is the
+owner's own System Settings choice.
 
 ## Screenshots
 

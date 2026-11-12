@@ -22,7 +22,7 @@ Do not propose it again, and do not accept a solution that depends on it.
 
 **Status:** open, accepted for now.
 
-The fast path only covers the Hammerspoon hotkeys (and the opt-in scroll over the Dock), which
+The fast path only covers the scroll gesture over the Dock and the Hammerspoon hotkeys, which
 call `noswoosh` directly. Pressing the native shortcut on the keyboard (Ctrl+Cmd+Arrow since
 2026-09-24, Ctrl+Arrow before) still goes through the native
 ~1165 ms animation.

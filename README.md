@@ -3,7 +3,7 @@
 <p align="center">
   <b>Make macOS obey hands trained on Ubuntu and Windows.</b><br>
   Ctrl to copy, Ctrl+Arrow to jump words, Print Screen to crop, Delete to trash,<br>
-  Ctrl+Cmd+Arrow to change desktop. Native Spaces, SIP untouched, one command to install.
+  scroll over the Dock to change desktop. Native Spaces, SIP untouched, one command to install.
 </p>
 
 <p align="center">
@@ -39,7 +39,7 @@ the way so nobody has to rediscover it.
 | <kbd>Ctrl</kbd> <kbd>Backspace</kbd> | delete the previous word | Option+Backspace |
 | <kbd>Print Screen</kbd> | crop an area, save it **and** copy it | no such key |
 | <kbd>Delete</kbd> / <kbd>Shift</kbd> <kbd>Delete</kbd> in Finder | move to Trash / delete immediately, with confirmation | Cmd+Backspace / Option+Cmd+Backspace |
-| Mouse wheel over the Dock, opt-in (`DOCK_SCROLL_ENABLED`) | previous / next desktop, like the Ubuntu dock | nothing |
+| Mouse wheel over the Dock | previous / next desktop, like the Ubuntu dock | nothing |
 | <kbd>Ctrl</kbd> <kbd>Cmd</kbd> <kbd>←</kbd> <kbd>→</kbd> | switch desktop, about 0.13 s | Ctrl+Arrow, about 1.2 s |
 | <kbd>Ctrl</kbd> <kbd>Cmd</kbd> <kbd>Shift</kbd> <kbd>←</kbd> <kbd>→</kbd> | take the window to the next desktop | drag it to the screen edge and wait |
 | <kbd>Option</kbd> <kbd>Shift</kbd> <kbd>←</kbd> <kbd>→</kbd> | move the window to the next monitor, like Super+Shift+Arrow on Ubuntu | drag it across |
@@ -106,7 +106,7 @@ flowchart LR
 
     KB -->|key events| HS
     HS -->|Ctrl C becomes Cmd C| APP
-    HS -->|Ctrl Cmd Arrow| NS
+    HS -->|wheel over Dock, Ctrl Cmd Arrow| NS
     HS -->|window move, mid-drag| SS
     HS -->|Print Screen, Ctrl Cmd L| SYS
     NS --> SYS
@@ -140,7 +140,7 @@ Tunables sit at the top of the relevant block in [`hammerspoon/init.lua`](hammer
 | `HINT_DURATION` | `0.114` | length of the directional sweep drawn on desktop switch |
 | `SCREENSHOT_SOUND` | `true` | shutter sound on Print Screen |
 | `FINDER_DELETE_ENABLED` | `true` | Delete and Shift+Delete in Finder |
-| `DOCK_SCROLL_ENABLED` | `false` | scroll over the Dock to change desktop; off keeps the wheel stock |
+| `DOCK_SCROLL_ENABLED` | `true` | scroll over the Dock to change desktop; `false` keeps the wheel stock |
 | `SCROLL_INVERT` | `false` | flip the Dock scroll direction |
 
 Every setting and the reason behind it: [`docs/settings.md`](docs/settings.md).

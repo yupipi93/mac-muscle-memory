@@ -96,7 +96,7 @@ printf '\n\033[1mHammerspoon runtime\033[0m\n'
 if command -v hs >/dev/null 2>&1 && pgrep -x Hammerspoon >/dev/null 2>&1; then
     printf '  %-52s %s\n' "accessibility granted"   "$(hsq 'hs.accessibilityState()')"
     printf '  %-52s %s\n' "launches at login"       "$(hsq 'hs.autoLaunch()')"
-    printf '  %-52s %s\n' "dock scroll tap (expected: off)" "$(hsq 'return dockScrollTap and dockScrollTap:isEnabled() or "off"')"
+    printf '  %-52s %s\n' "dock scroll tap active" "$(hsq 'return dockScrollTap and dockScrollTap:isEnabled() or "off"')"
     printf '  %-52s %s\n' "clipboard tap active"    "$(hsq 'clipboardTap:isEnabled()')"
     printf '  %-52s %s\n' "screenshot tap active"   "$(hsq 'screenshotTap:isEnabled()')"
     printf '  %-52s %s\n' "hotkeys registered"      "$(hsq 'return #hs.hotkey.getHotkeys()')"
