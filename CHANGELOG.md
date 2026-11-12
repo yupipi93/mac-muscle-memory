@@ -2,6 +2,12 @@
 
 ## 2026-11-12
 
+### Added
+
+- Cursor keybindings in `cursor/keybindings.json`, linked by `apply.sh` and checked by
+  `capture.sh`: Ctrl+Option+Cmd+1 (then Enter) and Ctrl+Option+Cmd+2 bring back a Claude Code
+  icon missing from the sidebar after Cursor starts. On the card and in `docs/settings.md`.
+
 ### Removed
 
 - Middle click pastes (#3, #4): the owner wants the mouse wheel stock. The middle click is

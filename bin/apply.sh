@@ -170,6 +170,10 @@ say "Config files"
 link_config "$REPO/hammerspoon/init.lua" "$HOME/.hammerspoon/init.lua" "Hammerspoon init.lua"
 link_config "$REPO/ghostty/config" "$HOME/.config/ghostty/config" "Ghostty config"
 link_config "$REPO/nano/nanorc" "$HOME/.nanorc" "nano config"
+# Cursor keybindings: the two-step fix for a missing Claude Code icon. See docs/settings.md.
+if [ -d /Applications/Cursor.app ]; then
+    link_config "$REPO/cursor/keybindings.json" "$HOME/Library/Application Support/Cursor/User/keybindings.json" "Cursor keybindings"
+fi
 # Ghostty also reads this second location and it wins over the first. Keep it out of the way
 # so the repo file is the only source of truth.
 GHOSTTY_AS="$HOME/Library/Application Support/com.mitchellh.ghostty/config"

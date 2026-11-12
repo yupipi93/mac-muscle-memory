@@ -12,6 +12,7 @@ wires up all of it; the permissions macOS reserves for a human are in `manual-st
 | [Ghostty](#ghostty) | terminal with Linux-style shortcuts | `brew install --cask ghostty` | `ghostty/config` | nothing |
 | [MesloLGS Nerd Font](#ghostty) | terminal font with prompt glyphs | `brew install --cask font-meslo-lg-nerd-font` | referenced by `ghostty/config` | nothing |
 | [GNU nano](#gnu-nano) | terminal editor with line numbers and colours | `brew install nano` | `nano/nanorc` | nothing |
+| Cursor | editor; only its keybindings live here, see `settings.md` | installed by hand | `cursor/keybindings.json` | nothing |
 | [cliclick](#cliclick) | manual debugging only | `brew install cliclick` | none | Accessibility when run from Hammerspoon |
 
 ## Hammerspoon

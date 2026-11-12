@@ -546,6 +546,23 @@ them when missing and skips them when present; it does not touch the other login
 
 Check: `osascript -e 'tell application "System Events" to get the name of every login item'`.
 
+## Cursor: bring back a missing Claude Code icon
+
+Sometimes after Cursor starts, the Claude Code icon is missing from the sidebar. Cursor builds
+its list of sidebar entries before the extension activates, and does not rebuild it on its own.
+Moving any view to a new container forces the rebuild, so two keybindings in
+`cursor/keybindings.json` (symlinked to Cursor's user `keybindings.json` by `apply.sh`) do it.
+Both use `runCommands`, which Cursor still dispatches while a Claude webview has the focus.
+
+| Keys | Does |
+|------|------|
+| **Ctrl+Option+Cmd+1**, then Enter | `workbench.view.explorer` + `workbench.action.moveView`. The picker opens with "new panel entry" selected; Enter moves Folders there and the sidebar rebuilds, icon included. |
+| **Ctrl+Option+Cmd+2** | `workbench.action.resetViewLocations` puts Folders back, then `workbench.view.extension.claude-sessions-sidebar` and `claudeVSCodeSessionsList.focus` open the Claude Code session list. |
+
+On a Windows-layout keyboard Option is the Win key and Cmd the key labelled Alt (the dual
+labels on the card): press Ctrl+Win+Alt+1, then Ctrl+Win+Alt+2. If the picker does not open,
+click into the editor first so the focus is not in a webview.
+
 ## Settings deliberately not applied
 
 | Setting | Why not |

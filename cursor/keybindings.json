@@ -1,0 +1,35 @@
+[
+    {
+        "key": "ctrl+enter",
+        "command": "workbench.action.terminal.sendSequence",
+        "args": {
+            "text": "\u001b\r"
+        },
+        "when": "terminalFocus"
+    },
+    // Claude Code icon missing after startup (Cursor builds its sidebar list before the
+    // extension activates). Step 1: move Folders to a new panel entry (press Enter on the
+    // picker); that rebuilds the list.
+    {
+        "key": "ctrl+alt+cmd+1",
+        "command": "runCommands",
+        "args": {
+            "commands": [
+                "workbench.view.explorer",
+                "workbench.action.moveView"
+            ]
+        }
+    },
+    // Step 2: put Folders back and open the Claude Code session list.
+    {
+        "key": "ctrl+alt+cmd+2",
+        "command": "runCommands",
+        "args": {
+            "commands": [
+                "workbench.action.resetViewLocations",
+                "workbench.view.extension.claude-sessions-sidebar",
+                "claudeVSCodeSessionsList.focus"
+            ]
+        }
+    }
+]
