@@ -179,6 +179,7 @@ bin/capture.sh           drift check against what this repo expects
 bin/measure-switch.sh    time a desktop switch
 hammerspoon/init.lua     every custom shortcut, symlinked to ~/.hammerspoon/init.lua
 ghostty/config           terminal config, symlinked to ~/.config/ghostty/config
+cursor/keybindings.json  Cursor shortcuts, symlinked to Cursor's user keybindings.json
 helper/spaceswitch.c     tiny injector for the native desktop shortcut
 docs/                    everything above, plus the shortcut card and its screenshot
 personal.example/        template for personal/, your gitignored private notes

@@ -85,6 +85,16 @@ for pair in "$HOME/.hammerspoon/init.lua|$REPO/hammerspoon/init.lua" "$HOME/.con
         fail=$((fail + 1))
     fi
 done
+if [ -d /Applications/Cursor.app ]; then
+    target="$HOME/Library/Application Support/Cursor/User/keybindings.json"
+    if [ -L "$target" ] && [ "$(readlink "$target")" = "$REPO/cursor/keybindings.json" ]; then
+        printf '  ok    %-46s -> repo\n' "Cursor keybindings.json"
+        pass=$((pass + 1))
+    else
+        printf '  DRIFT %-46s not linked to this repo\n' "Cursor keybindings.json"
+        fail=$((fail + 1))
+    fi
+fi
 if [ -d /Applications/Ghostty.app ]; then
     printf '  ok    %-46s installed\n' "Ghostty.app"
 else
