@@ -340,6 +340,12 @@ path, so it is one or the other. Hence two steps: capture to the file first, the
 with `hs.image.imageFromPath` and write it to the pasteboard. The file is the original and the
 clipboard is the copy, which is the right way round if anything fails in between.
 
+**The pasteboard gets PNG and TIFF**, like the native clipboard capture. Since macOS 27.2.1
+(2026-11-19) `hs.pasteboard.writeObjects(img)` writes only `public.tiff`, and the capture would
+not paste in apps that ask for PNG. The code now adds the file's own bytes as `public.png`.
+Check after a capture: `hs -c 'return table.concat(hs.pasteboard.contentTypes(), ",")'` lists
+both `public.tiff` and `public.png`.
+
 **Cancelling with Esc leaves the clipboard alone.** `screencapture` writes nothing when the
 user cancels, so the code checks the file exists before touching the pasteboard. Overwriting
 the clipboard with the previous capture would be worse than doing nothing.
