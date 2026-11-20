@@ -739,8 +739,17 @@ local function copyShotToPasteboard(path, attempt)
         end
         return
     end
+    -- PNG y TIFF a la vez, como hace la captura nativa al portapapeles. Desde macOS 27.2.1
+    -- (2026-11-19) writeObjects con una hs.image deja solo public.tiff, y las apps que piden
+    -- PNG al pegar no pegaban nada. El PNG son los bytes del fichero tal cual.
     local img = hs.image.imageFromPath(path)
     if img then hs.pasteboard.writeObjects(img) end
+    local f = io.open(path, "rb")
+    if f then
+        local png = f:read("a")
+        f:close()
+        hs.pasteboard.writeDataForUTI(nil, "public.png", png, img ~= nil)
+    end
 end
 
 screenshotTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)

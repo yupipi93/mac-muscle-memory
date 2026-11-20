@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-20
+
+### Fixed
+
+- The Print Screen key copies the capture as PNG and TIFF again. Since macOS 27.2.1 writing
+  an `hs.image` to the pasteboard left only `public.tiff`, and apps that paste PNG got nothing.
+
 ## 2026-11-12
 
 ### Added
