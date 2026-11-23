@@ -340,11 +340,15 @@ path, so it is one or the other. Hence two steps: capture to the file first, the
 with `hs.image.imageFromPath` and write it to the pasteboard. The file is the original and the
 clipboard is the copy, which is the right way round if anything fails in between.
 
-**The pasteboard gets PNG and TIFF**, like the native clipboard capture. Since macOS 27.2.1
-(2026-11-19) `hs.pasteboard.writeObjects(img)` writes only `public.tiff`, and the capture would
-not paste in apps that ask for PNG. The code now adds the file's own bytes as `public.png`.
-Check after a capture: `hs -c 'return table.concat(hs.pasteboard.contentTypes(), ",")'` lists
-both `public.tiff` and `public.png`.
+**The pasteboard gets one PNG, exactly like the native capture.** `screencapture -c` on macOS
+27.2.1 leaves a single item with only `public.png` (measured 2026-11-23); macOS converts it to
+TIFF, JPEG and the rest for apps that ask. History: until 2026-11-19 the code used
+`hs.pasteboard.writeObjects(img)`, which since 27.2.1 writes only `public.tiff`, so apps that
+want PNG pasted nothing (fixed in PR #10 by adding `public.png` after the TIFF). With the TIFF
+first, Cmd+V still failed in some apps on 2026-11-23 while right click > Paste worked, so the
+TIFF is gone and the code writes the file's own bytes as `public.png`, nothing else.
+Check after a capture: `hs -c 'return table.concat(hs.pasteboard.contentTypes(), ",")'` prints
+`public.png`.
 
 **Cancelling with Esc leaves the clipboard alone.** `screencapture` writes nothing when the
 user cancels, so the code checks the file exists before touching the pasteboard. Overwriting
