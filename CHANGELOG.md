@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-26
+
+### Added
+
+- The Print Screen key repairs its own clipboard copy: it verifies the PNG after copying,
+  retries, falls back to `osascript`, puts the image back if it vanished before a paste, checks
+  the Screen Recording and Accessibility permissions every minute, and logs every step to
+  `~/Library/Logs/Hammerspoon/screenshots.log`. The wait for the file grew from 0.3 s to 3 s.
+
 ## 2026-11-20
 
 ### Fixed

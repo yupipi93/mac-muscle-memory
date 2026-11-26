@@ -727,27 +727,176 @@ local function screenshotPath()
     return string.format("%s/Screenshot %s.png", SCREENSHOT_DIR, os.date("%Y-%m-%d at %H.%M.%S"))
 end
 
+-- Autorreparacion (2026-11-26). La copia al portapapeles se rompio tres veces en una semana
+-- (20-nov, 23-nov, 26-nov), las dos primeras por cambios de formato de macOS 27.2.1, la
+-- tercera sin rastro. Por eso ahora cada paso se comprueba, se repara solo si puede, y deja
+-- constancia en ~/Library/Logs/Hammerspoon/screenshots.log para que el siguiente fallo tenga
+-- datos en vez de suposiciones:
+--   1. Tras copiar se lee el portapapeles: si no hay public.png con los mismos bytes que el
+--      fichero, se reintenta, y despues se copia por otra via (osascript, que no usa
+--      hs.pasteboard). Si tampoco, aviso en pantalla.
+--   2. Al pegar (Ctrl+V o Cmd+V) con la ultima captura aun en el portapapeles pero sin su
+--      imagen, se vuelve a escribir desde el fichero antes de que llegue el pegado.
+--   3. Cada minuto se revisan los permisos (Grabacion de pantalla, Accesibilidad) y la
+--      carpeta; un permiso perdido no se puede reparar desde aqui, pero se avisa.
+local SHOT_LOG = os.getenv("HOME") .. "/Library/Logs/Hammerspoon/screenshots.log"
+local SHOT_LOG_MAX_BYTES = 512 * 1024
+local SHOT_FILE_WAIT_TRIES = 30      -- 30 x 100 ms: lo que puede tardar en verse el fichero
+local SHOT_COPY_TRIES = 3
+local SHOT_PASTE_GUARD_SECONDS = 600 -- tras 10 minutos se deja de vigilar la ultima captura
+
+hs.fs.mkdir(os.getenv("HOME") .. "/Library/Logs/Hammerspoon")
+
+local function shotLog(msg)
+    local size = hs.fs.attributes(SHOT_LOG, "size")
+    if size and size > SHOT_LOG_MAX_BYTES then os.rename(SHOT_LOG, SHOT_LOG .. ".1") end
+    local f = io.open(SHOT_LOG, "a")
+    if not f then return end
+    f:write(os.date("%Y-%m-%d %H:%M:%S "), msg, "\n")
+    f:close()
+end
+
+local function pasteboardTypes()
+    return table.concat(hs.pasteboard.contentTypes() or {}, ",")
+end
+
+local function readFile(path)
+    local f = io.open(path, "rb")
+    if not f then return nil end
+    local data = f:read("a")
+    f:close()
+    return data
+end
+
+-- El portapapeles tiene esta captura si su public.png mide lo mismo que el fichero. Comparar
+-- el tamano basta y no copia megas dentro de la tap.
+local function pasteboardHoldsShot(png)
+    local data = hs.pasteboard.readDataForUTI(nil, "public.png")
+    return data ~= nil and #data == #png
+end
+
+-- La ultima captura copiada: ruta, bytes y el changeCount que dejo. Si el changeCount sigue
+-- igual, nadie ha copiado otra cosa despues, y el portapapeles deberia tener esa imagen.
+lastShot = nil
+
+local function rememberShot(path, png)
+    lastShot = { path = path, size = #png, changeCount = hs.pasteboard.changeCount(),
+        at = hs.timer.secondsSinceEpoch() }
+end
+
+-- Solo public.png, igual que la captura nativa al portapapeles en macOS 27.2.1 (medido
+-- 2026-11-23: screencapture -c deja un unico item con public.png). macOS convierte a TIFF,
+-- JPEG, etc. para quien lo pida. Antes se escribia TIFF (por writeObjects) y PNG detras, y
+-- Cmd+V dejo de pegar en algunas apps aunque el boton derecho > Pegar si funcionaba.
+local function writeShot(png)
+    hs.pasteboard.writeDataForUTI(nil, "public.png", png, false)
+end
+
+-- Segunda via, independiente de hs.pasteboard, por si una actualizacion de macOS o de
+-- Hammerspoon rompe la primera. Asincrona: no bloquea Hammerspoon mientras corre.
+local function copyShotViaOsascript(path, png)
+    local script = 'set the clipboard to (read (POSIX file "' .. path .. '") as «class PNGf»)'
+    runTask("/usr/bin/osascript", { "-e", script }, function(code)
+        if code == 0 and pasteboardHoldsShot(png) then
+            rememberShot(path, png)
+            shotLog("REPARADA via osascript | tipos=" .. pasteboardTypes())
+        else
+            shotLog("FALLO copia tambien via osascript (exit " .. tostring(code) .. ") | tipos="
+                .. pasteboardTypes())
+            hs.alert.show("Captura guardada, pero no se ha podido copiar al portapapeles")
+        end
+    end)
+end
+
 -- Si se cancela con Esc, screencapture no escribe nada. En ese caso no se toca el portapapeles:
 -- machacarlo con la captura anterior seria peor que no hacer nada.
 local function copyShotToPasteboard(path, attempt)
     attempt = attempt or 1
     if not hs.fs.attributes(path) then
-        -- El proceso puede terminar una fraccion de segundo antes de que el fichero este
-        -- visible. Se reintenta un par de veces antes de darlo por cancelado.
-        if attempt < 3 then
+        -- El fichero puede verse un poco despues de que el proceso termine. Antes se esperaban
+        -- 0,3 s; ahora hasta 3 s antes de darlo por cancelado.
+        if attempt < SHOT_FILE_WAIT_TRIES then
             hs.timer.doAfter(0.1, function() copyShotToPasteboard(path, attempt + 1) end)
+        else
+            shotLog("sin fichero: cancelada con Esc o screencapture fallo | " .. path)
         end
         return
     end
-    -- Solo public.png, igual que la captura nativa al portapapeles en macOS 27.2.1 (medido
-    -- 2026-11-23: screencapture -c deja un unico item con public.png). macOS convierte a TIFF,
-    -- JPEG, etc. para quien lo pida. Antes se escribia TIFF (por writeObjects) y PNG detras, y
-    -- Cmd+V dejo de pegar en algunas apps aunque el boton derecho > Pegar si funcionaba.
-    local f = io.open(path, "rb")
-    if not f then return end
-    local png = f:read("a")
-    f:close()
-    hs.pasteboard.writeDataForUTI(nil, "public.png", png, false)
+    local png = readFile(path)
+    if not png or #png == 0 then
+        shotLog("FALLO no se puede leer el fichero | " .. path)
+        return
+    end
+    for try = 1, SHOT_COPY_TRIES do
+        writeShot(png)
+        if pasteboardHoldsShot(png) then
+            rememberShot(path, png)
+            shotLog(string.format("copiada (intento %d, %d bytes) | tipos=%s | %s", try, #png,
+                pasteboardTypes(), path))
+            return
+        end
+    end
+    shotLog("FALLO tras " .. SHOT_COPY_TRIES .. " intentos con hs.pasteboard | tipos="
+        .. pasteboardTypes() .. " | probando osascript")
+    copyShotViaOsascript(path, png)
+end
+
+-- Paso 2: justo antes de pegar. Va en su propia tap, creada despues de clipboardTap, de modo
+-- que ve el Ctrl+V antes de que se convierta en Cmd+V. No consume nada: solo repara y deja
+-- pasar la tecla.
+local function guardShotBeforePaste()
+    local shot = lastShot
+    if not shot then return end
+    if hs.timer.secondsSinceEpoch() - shot.at > SHOT_PASTE_GUARD_SECONDS then return end
+    -- Otro changeCount: se ha copiado otra cosa despues de la captura, y eso manda.
+    if hs.pasteboard.changeCount() ~= shot.changeCount then return end
+    -- Dentro de una tap: mirar los tipos es instantaneo, leer una imagen de megas no, y macOS
+    -- desactiva la tap que tarda.
+    for _, t in ipairs(hs.pasteboard.contentTypes() or {}) do
+        if t == "public.png" then return end
+    end
+    local png = readFile(shot.path)
+    if not png then return end
+    writeShot(png)
+    rememberShot(shot.path, png)
+    local app = hs.application.frontmostApplication()
+    shotLog("REPARADA al pegar en " .. (app and app:name() or "?") .. " | tipos=" .. pasteboardTypes())
+end
+
+shotPasteGuardTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
+    if event:getKeyCode() ~= hs.keycodes.map.v then return false end
+    local flags = event:getFlags()
+    if not (flags.cmd or flags.ctrl) or flags.alt then return false end
+    local ok, err = pcall(guardShotBeforePaste)
+    if not ok then shotLog("error en la guarda de pegado: " .. tostring(err)) end
+    return false
+end)
+
+-- Paso 3: permisos y carpeta. Un permiso retirado (una actualizacion de macOS lo hace a veces)
+-- solo lo devuelve una persona en Ajustes del Sistema, asi que se avisa una vez por hora.
+local shotHealthWarnedAt = 0
+
+local function checkScreenshotHealth()
+    local problems = {}
+    if not hs.screenRecordingState() then
+        problems[#problems + 1] = "falta el permiso de Grabacion de pantalla"
+    end
+    if not hs.accessibilityState() then
+        problems[#problems + 1] = "falta el permiso de Accesibilidad"
+    end
+    if not hs.fs.attributes(SCREENSHOT_DIR) then
+        hs.fs.mkdir(SCREENSHOT_DIR)
+        shotLog("REPARADA carpeta de capturas recreada: " .. SCREENSHOT_DIR)
+    end
+    if #problems == 0 then return true end
+    local now = hs.timer.secondsSinceEpoch()
+    if now - shotHealthWarnedAt > 3600 then
+        shotHealthWarnedAt = now
+        local msg = "Capturas: " .. table.concat(problems, " y ") .. " (Ajustes > Privacidad)"
+        shotLog("AVISO " .. msg)
+        hs.alert.show("Hammerspoon. " .. msg, 8)
+    end
+    return false
 end
 
 screenshotTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
@@ -765,11 +914,32 @@ screenshotTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(ev
     if not SCREENSHOT_SOUND then args[#args + 1] = "-x" end
     args[#args + 1] = path
 
-    runTask("/usr/sbin/screencapture", args, function() copyShotToPasteboard(path) end)
+    shotLog("tecla | " .. path)
+    runTask("/usr/sbin/screencapture", args, function(code, _, stderr)
+        if code ~= 0 then
+            shotLog("screencapture exit " .. tostring(code) .. " " .. tostring(stderr or ""):gsub("%s+$", ""))
+        end
+        copyShotToPasteboard(path)
+    end)
     return true
 end)
 
 screenshotTap:start()
+shotPasteGuardTap:start()
+
+checkScreenshotHealth()
+screenshotHealthTimer = hs.timer.doEvery(60, checkScreenshotHealth)
+
+-- Expuesto para probar desde la terminal:
+--   hs -c "return screenshotSelfHeal.copy('<ruta a un png>')"
+--   hs -c "return screenshotSelfHeal.health()"
+screenshotSelfHeal = {
+    copy = copyShotToPasteboard,
+    guard = guardShotBeforePaste,
+    health = checkScreenshotHealth,
+    viaOsascript = function(path) copyShotViaOsascript(path, readFile(path)) end,
+    log = SHOT_LOG,
+}
 
 -- Cambiar de escritorio haciendo scroll con el raton encima del Dock (estilo Ubuntu).
 -- Con DOCK_SCROLL_ENABLED = false no se crea la tap y la rueda queda como la trae macOS.
@@ -848,7 +1018,8 @@ dockScroll = {
 -- encender. Desde fuera parece que Ctrl+C "a veces" no funciona. Se revisan cada pocos
 -- segundos y se reactivan. Global para que el recolector de basura no se lleve el temporizador.
 tapWatchdog = hs.timer.doEvery(3, function()
-    for _, tap in pairs({ clipboardTap, tileTap, finderDeleteTap, screenshotTap, dockScrollTap }) do
+    for _, tap in pairs({ clipboardTap, tileTap, finderDeleteTap, screenshotTap, shotPasteGuardTap,
+        dockScrollTap }) do
         if not tap:isEnabled() then tap:start() end
     end
 end)
