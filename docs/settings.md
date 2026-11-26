@@ -354,8 +354,26 @@ Check after a capture: `hs -c 'return table.concat(hs.pasteboard.contentTypes(),
 user cancels, so the code checks the file exists before touching the pasteboard. Overwriting
 the clipboard with the previous capture would be worse than doing nothing.
 
-The file can appear a fraction of a second after the process exits, so the check retries twice
-at 100 ms before concluding the capture was cancelled.
+The file can appear a fraction of a second after the process exits, so the check polls every
+100 ms for up to 3 s before concluding the capture was cancelled (it was 0.3 s until
+2026-11-26).
+
+### Self-healing copy
+
+The copy broke three times in one week (2026-11-20 and 11-23 by macOS 27.2.1 format changes,
+11-26 with no trace left), so since 2026-11-26 every step checks itself, repairs what it can and
+logs to `~/Library/Logs/Hammerspoon/screenshots.log` (rotated at 512 KB):
+
+| Step | Check | Repair |
+|------|-------|--------|
+| After the capture | the pasteboard's `public.png` has the file's byte count | rewrite up to 3 times, then copy through a second path that does not use `hs.pasteboard` (`osascript`, `set the clipboard to (read ... as «class PNGf»)`); if both fail, an on-screen alert |
+| On Ctrl+V or Cmd+V | within 10 minutes of a capture, nothing else copied since (same `changeCount`), and `public.png` missing | rewrite the image from the file before the paste goes through (separate tap that never consumes the key) |
+| Every 60 s | Screen Recording and Accessibility granted, screenshot folder present | recreate the folder; a revoked permission needs a human click, so an alert at most once an hour |
+
+The tap watchdog (see "Watchdog" above) also restarts the paste-guard tap. To diagnose a failed paste, read
+the log first: every key press, `screencapture` exit code, copy attempt, repair and the
+pasteboard types are there. Test hooks: `hs -c "return screenshotSelfHeal.health()"`,
+`screenshotSelfHeal.copy(<png path>)`, `screenshotSelfHeal.viaOsascript(<png path>)`.
 
 The filename matches the macOS convention, so keyboard captures and native-shortcut captures
 sort together in the folder.
