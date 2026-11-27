@@ -367,13 +367,20 @@ logs to `~/Library/Logs/Hammerspoon/screenshots.log` (rotated at 512 KB):
 | Step | Check | Repair |
 |------|-------|--------|
 | After the capture | the pasteboard's `public.png` has the file's byte count | rewrite up to 3 times, then copy through a second path that does not use `hs.pasteboard` (`osascript`, `set the clipboard to (read ... as «class PNGf»)`); if both fail, an on-screen alert |
-| On Ctrl+V or Cmd+V | within 10 minutes of a capture, nothing else copied since (same `changeCount`), and `public.png` missing | rewrite the image from the file before the paste goes through (separate tap that never consumes the key) |
 | Every 60 s | Screen Recording and Accessibility granted, screenshot folder present | recreate the folder; a revoked permission needs a human click, so an alert at most once an hour |
 
-The tap watchdog (see "Watchdog" above) also restarts the paste-guard tap. To diagnose a failed paste, read
-the log first: every key press, `screencapture` exit code, copy attempt, repair and the
-pasteboard types are there. Test hooks: `hs -c "return screenshotSelfHeal.health()"`,
-`screenshotSelfHeal.copy(<png path>)`, `screenshotSelfHeal.viaOsascript(<png path>)`.
+To diagnose a failed paste, read the log first: every key press, `screencapture` exit code,
+copy attempt, repair and the pasteboard types are there. Test hooks:
+`hs -c "return screenshotSelfHeal.health()"`, `screenshotSelfHeal.copy(<png path>)`,
+`screenshotSelfHeal.viaOsascript(<png path>)`.
+
+**Nothing listens to the paste key.** PR #12 also added a tap on Ctrl+V / Cmd+V that put the
+image back if it had vanished. On 2026-11-27 the keyboard stopped pasting captures in every
+app while right click > Paste still worked, with the PNG intact on the pasteboard and the tap
+never writing to it. With that tap stopped, Ctrl+V and Cmd+V pasted again in the same test, so
+it was removed. The mechanism was not found. The same symptom was also seen on 2026-11-23,
+before the tap existed, so the root cause may be intermittent. Next time, A/B before adding
+anything on the paste path.
 
 The filename matches the macOS convention, so keyboard captures and native-shortcut captures
 sort together in the folder.

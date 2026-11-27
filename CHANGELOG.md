@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-27
+
+### Removed
+
+- The paste guard from 2026-11-26 (a tap on Ctrl+V / Cmd+V): with it on, the keyboard stopped
+  pasting captures in every app while right click > Paste worked; with it off, both keys pasted.
+
 ## 2026-11-26
 
 ### Added
