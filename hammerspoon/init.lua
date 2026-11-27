@@ -735,15 +735,18 @@ end
 --   1. Tras copiar se lee el portapapeles: si no hay public.png con los mismos bytes que el
 --      fichero, se reintenta, y despues se copia por otra via (osascript, que no usa
 --      hs.pasteboard). Si tampoco, aviso en pantalla.
---   2. Al pegar (Ctrl+V o Cmd+V) con la ultima captura aun en el portapapeles pero sin su
---      imagen, se vuelve a escribir desde el fichero antes de que llegue el pegado.
---   3. Cada minuto se revisan los permisos (Grabacion de pantalla, Accesibilidad) y la
+--   2. Cada minuto se revisan los permisos (Grabacion de pantalla, Accesibilidad) y la
 --      carpeta; un permiso perdido no se puede reparar desde aqui, pero se avisa.
+--
+-- NO hay nada en la tecla de pegar (2026-11-27). Una tap que vigilaba Ctrl+V / Cmd+V para
+-- reponer la imagen (PR #12) coincidio con que el teclado dejara de pegar capturas en todas
+-- las apps, mientras el boton derecho > Pegar seguia funcionando; con esa tap apagada, Ctrl+V
+-- y Cmd+V volvieron a pegar en la misma prueba. No se llego a ver el mecanismo (la tap no
+-- tocaba el portapapeles), pero no vuelvas a poner codigo en la ruta del pegado sin un A/B.
 local SHOT_LOG = os.getenv("HOME") .. "/Library/Logs/Hammerspoon/screenshots.log"
 local SHOT_LOG_MAX_BYTES = 512 * 1024
 local SHOT_FILE_WAIT_TRIES = 30      -- 30 x 100 ms: lo que puede tardar en verse el fichero
 local SHOT_COPY_TRIES = 3
-local SHOT_PASTE_GUARD_SECONDS = 600 -- tras 10 minutos se deja de vigilar la ultima captura
 
 hs.fs.mkdir(os.getenv("HOME") .. "/Library/Logs/Hammerspoon")
 
@@ -775,15 +778,6 @@ local function pasteboardHoldsShot(png)
     return data ~= nil and #data == #png
 end
 
--- La ultima captura copiada: ruta, bytes y el changeCount que dejo. Si el changeCount sigue
--- igual, nadie ha copiado otra cosa despues, y el portapapeles deberia tener esa imagen.
-lastShot = nil
-
-local function rememberShot(path, png)
-    lastShot = { path = path, size = #png, changeCount = hs.pasteboard.changeCount(),
-        at = hs.timer.secondsSinceEpoch() }
-end
-
 -- Solo public.png, igual que la captura nativa al portapapeles en macOS 27.2.1 (medido
 -- 2026-11-23: screencapture -c deja un unico item con public.png). macOS convierte a TIFF,
 -- JPEG, etc. para quien lo pida. Antes se escribia TIFF (por writeObjects) y PNG detras, y
@@ -798,7 +792,6 @@ local function copyShotViaOsascript(path, png)
     local script = 'set the clipboard to (read (POSIX file "' .. path .. '") as «class PNGf»)'
     runTask("/usr/bin/osascript", { "-e", script }, function(code)
         if code == 0 and pasteboardHoldsShot(png) then
-            rememberShot(path, png)
             shotLog("REPARADA via osascript | tipos=" .. pasteboardTypes())
         else
             shotLog("FALLO copia tambien via osascript (exit " .. tostring(code) .. ") | tipos="
@@ -830,7 +823,6 @@ local function copyShotToPasteboard(path, attempt)
     for try = 1, SHOT_COPY_TRIES do
         writeShot(png)
         if pasteboardHoldsShot(png) then
-            rememberShot(path, png)
             shotLog(string.format("copiada (intento %d, %d bytes) | tipos=%s | %s", try, #png,
                 pasteboardTypes(), path))
             return
@@ -841,38 +833,7 @@ local function copyShotToPasteboard(path, attempt)
     copyShotViaOsascript(path, png)
 end
 
--- Paso 2: justo antes de pegar. Va en su propia tap, creada despues de clipboardTap, de modo
--- que ve el Ctrl+V antes de que se convierta en Cmd+V. No consume nada: solo repara y deja
--- pasar la tecla.
-local function guardShotBeforePaste()
-    local shot = lastShot
-    if not shot then return end
-    if hs.timer.secondsSinceEpoch() - shot.at > SHOT_PASTE_GUARD_SECONDS then return end
-    -- Otro changeCount: se ha copiado otra cosa despues de la captura, y eso manda.
-    if hs.pasteboard.changeCount() ~= shot.changeCount then return end
-    -- Dentro de una tap: mirar los tipos es instantaneo, leer una imagen de megas no, y macOS
-    -- desactiva la tap que tarda.
-    for _, t in ipairs(hs.pasteboard.contentTypes() or {}) do
-        if t == "public.png" then return end
-    end
-    local png = readFile(shot.path)
-    if not png then return end
-    writeShot(png)
-    rememberShot(shot.path, png)
-    local app = hs.application.frontmostApplication()
-    shotLog("REPARADA al pegar en " .. (app and app:name() or "?") .. " | tipos=" .. pasteboardTypes())
-end
-
-shotPasteGuardTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
-    if event:getKeyCode() ~= hs.keycodes.map.v then return false end
-    local flags = event:getFlags()
-    if not (flags.cmd or flags.ctrl) or flags.alt then return false end
-    local ok, err = pcall(guardShotBeforePaste)
-    if not ok then shotLog("error en la guarda de pegado: " .. tostring(err)) end
-    return false
-end)
-
--- Paso 3: permisos y carpeta. Un permiso retirado (una actualizacion de macOS lo hace a veces)
+-- Paso 2: permisos y carpeta. Un permiso retirado (una actualizacion de macOS lo hace a veces)
 -- solo lo devuelve una persona en Ajustes del Sistema, asi que se avisa una vez por hora.
 local shotHealthWarnedAt = 0
 
@@ -925,7 +886,6 @@ screenshotTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(ev
 end)
 
 screenshotTap:start()
-shotPasteGuardTap:start()
 
 checkScreenshotHealth()
 screenshotHealthTimer = hs.timer.doEvery(60, checkScreenshotHealth)
@@ -935,7 +895,6 @@ screenshotHealthTimer = hs.timer.doEvery(60, checkScreenshotHealth)
 --   hs -c "return screenshotSelfHeal.health()"
 screenshotSelfHeal = {
     copy = copyShotToPasteboard,
-    guard = guardShotBeforePaste,
     health = checkScreenshotHealth,
     viaOsascript = function(path) copyShotViaOsascript(path, readFile(path)) end,
     log = SHOT_LOG,
@@ -1018,8 +977,7 @@ dockScroll = {
 -- encender. Desde fuera parece que Ctrl+C "a veces" no funciona. Se revisan cada pocos
 -- segundos y se reactivan. Global para que el recolector de basura no se lleve el temporizador.
 tapWatchdog = hs.timer.doEvery(3, function()
-    for _, tap in pairs({ clipboardTap, tileTap, finderDeleteTap, screenshotTap, shotPasteGuardTap,
-        dockScrollTap }) do
+    for _, tap in pairs({ clipboardTap, tileTap, finderDeleteTap, screenshotTap, dockScrollTap }) do
         if not tap:isEnabled() then tap:start() end
     end
 end)
