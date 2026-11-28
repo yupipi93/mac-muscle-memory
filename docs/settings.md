@@ -178,7 +178,11 @@ nothing". `tapWatchdog` re-enables any stopped tap every 3 seconds.
 **Secure input.** While a password field (or an app with secure keyboard entry, such as a
 terminal option) holds secure input, no event tap sees the keyboard, so Ctrl+C reaches the app
 as Ctrl+C. Nothing can work around that. Check it with
-`hs -c 'return hs.eventtap.isSecureInputEnabled()'`.
+`hs -c 'return hs.eventtap.isSecureInputEnabled()'` and see who holds it with
+`ioreg -d1 -l -w0 | grep kCGSSessionSecureInputPID`. After a screen lock `loginwindow` sometimes
+keeps it once unlocked; only locking and unlocking again (Ctrl+Cmd+Q) releases it.
+`secureInputTimer` checks every 20 s and shows an alert with that remedy, and names any other
+app that holds it for two minutes.
 
 **Copy and cut through the Edit menu in Cursor** (2026-11-11). Inside a Cursor webview (the
 Claude Code prompt, for one) a Cmd+C or Cmd+X keystroke copies nothing, synthetic or not, while

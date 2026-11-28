@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-28
+
+### Added
+
+- A warning when secure input stays on: if `loginwindow` keeps it after an unlock (every
+  shortcut goes dead at once), Hammerspoon says to lock and unlock the screen; another app that
+  holds it for two minutes is named. Checked every 20 s and 5 s after each unlock.
+
 ## 2026-11-27
 
 ### Removed
