@@ -982,6 +982,58 @@ tapWatchdog = hs.timer.doEvery(3, function()
     end
 end)
 
+-- Entrada segura atascada (2026-11-27 y 11-28): tras bloquear la pantalla, loginwindow a veces
+-- se queda con la entrada segura al desbloquear. Ninguna tap ve el teclado: Ctrl+C/V, mover
+-- ventanas y la captura fallan a la vez sin ningun error. Solo lo arregla una persona
+-- bloqueando y desbloqueando, asi que se avisa con el remedio. Otra app que la retenga mucho
+-- rato (un campo de contrasena, la entrada segura de una terminal) tambien se avisa.
+local SECURE_INPUT_ALERT_EVERY = 600
+local secureInputState = { pid = nil, checks = 0, warnedAt = 0 }
+
+local function secureInputHolder()
+    local out = hs.execute("/usr/sbin/ioreg -d1 -l -w0") or ""
+    if out:find('"CGSSessionScreenIsLocked"=Yes') then return nil, true end
+    local pid = tonumber(out:match('"kCGSSessionSecureInputPID"=(%d+)'))
+    if not pid then return nil, false end
+    local name = (hs.execute("/bin/ps -o comm= -p " .. pid) or ""):match("([^/\n]+)%s*$")
+    return { pid = pid, name = name or ("pid " .. pid) }, false
+end
+
+local function checkSecureInput()
+    if not hs.eventtap.isSecureInputEnabled() then
+        secureInputState.pid, secureInputState.checks = nil, 0
+        return nil
+    end
+    local holder, locked = secureInputHolder()
+    if locked or not holder then return holder end
+    if holder.pid ~= secureInputState.pid then
+        secureInputState.pid, secureInputState.checks = holder.pid, 0
+    end
+    secureInputState.checks = secureInputState.checks + 1
+    local stuckAfter = holder.name == "loginwindow" and 2 or 6
+    local now = hs.timer.secondsSinceEpoch()
+    if secureInputState.checks >= stuckAfter and now - secureInputState.warnedAt > SECURE_INPUT_ALERT_EVERY then
+        secureInputState.warnedAt = now
+        local msg = holder.name == "loginwindow"
+            and "Atajos sin respuesta: macOS dejo la entrada segura puesta. Bloquea y desbloquea la pantalla (Ctrl+Cmd+Q)"
+            or ("Atajos sin respuesta: " .. holder.name .. " tiene la entrada segura (campo de contrasena o ajuste de la app)")
+        shotLog("AVISO entrada segura retenida por " .. holder.name .. " (pid " .. holder.pid .. ")")
+        hs.alert.show(msg, 10)
+    end
+    return holder
+end
+
+secureInputTimer = hs.timer.doEvery(20, checkSecureInput)
+secureInputWatcher = hs.caffeinate.watcher.new(function(event)
+    if event == hs.caffeinate.watcher.screensDidUnlock then
+        secureInputState.warnedAt = 0
+        hs.timer.doAfter(5, checkSecureInput)
+    end
+end)
+secureInputWatcher:start()
+-- Probar: hs -c "return hs.inspect(secureInputCheck())"
+secureInputCheck = checkSecureInput
+
 -- spaceswitch es imprescindible: mueve ventanas entre escritorios y es el respaldo si falta
 -- noswoosh. cliclick ya no se usa en tiempo de ejecucion desde 2026-09-24.
 if not hs.fs.attributes(SPACESWITCH) then
